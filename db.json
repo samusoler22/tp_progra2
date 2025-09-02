@@ -1,0 +1,36 @@
+{
+    "usuarios": {
+        "uade_samuel": {
+            "nombre": "Samuel Soler",
+            "dni": "95918716",
+            "usuario": "uade_samuel",
+            "contrasena": "A12345678",
+            "email": "ssoler@test.com",
+            "alias": "s_mp",
+            "ingresos": {
+                "fecha": "2025-09-02",
+                "monto": "2000",
+                "currency": "ARS",
+                "tipo": "Comida"
+            },
+            "egresos": {},
+            "saldo": 0
+        },
+        "uade_pedro": {
+            "nombre": "Pedro Luis",
+            "dni": "8766635",
+            "usuario": "uade_pedro",
+            "contrasena": "B12345678",
+            "email": "pluis@test.com",
+            "alias": "luis_mp",
+            "ingresos": {
+                "fecha": "2025-09-02",
+                "monto": "2000",
+                "currency": "ARS",
+                "tipo": "Comida"
+            },
+            "egresos": {},
+            "saldo": 0
+        }
+    }
+}
