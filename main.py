@@ -1,7 +1,60 @@
 import json
 
 '''TODO: 
-    - FALTA AGREGAR: MATRICES, 
+    Repartición de Tareas:
+        - Agus Goldberg:
+        - Samu:
+        - Benja:
+        - Agus Lopez:
+
+    Tareas:
+        1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
+            - En la funcion "nuevo usuario" crear logica para validar los datos que ingresa el usuario.
+            - Las funciones ya estan prehechas, agregar mas de ser necesario.
+
+        2. Crear funcion para ingresar dinero
+            - Crear logica para agregar dinero a la cuenta del usuario en la funcion "ingresar_dinero".
+            - Tener en cuenta que habria que agregar una transaccion en el usuario por cada ingreso.
+            - Que se agregue el ingreso al saldo del usuario.
+            - IMPORTANTE: Tener en cuenta que la parte de las transacciones es una matriz.
+
+        3. Crear funcion para realizar transferencia.
+            - Crear logica para realizar transferencia entre cuentas dentro de la funcion "realizar_transferencia"
+            - Tener en cuenta que esta funcion usa dos parametros, uno es alias porque vamos a buscar el usuario a transferir en nuestro diccionario de usuarios
+            - Tener en cuenta que el monto que se transfiere se resta del saldo del usuario que transfiere y se agregan las transacciones pertinentes.
+        
+        4. Crear funcion para mostrar resumen de cuenta
+            - Crear logica en funcion "resumen_cuenta"
+            - Por defecto mostrar transacciones del mes en curso o el mes anterior (a definir)
+            - Luego de mostrar resumen, crear menu para preguntar si quiere:
+                1-Mostrar resumen de transacciones entre un rango de fechas
+                2-Mostrar ultimos 5 transacciones (aca aplicamos slicing de la lista)
+                3-Mostrar primeras 5 transacciones del mes.
+        
+        5 - Crear funcion de Control de Gastos.
+            - Crear logica donde se muestre gastos total del mes y estilo de gastos basado en las etiquetas de las transacciones de egreso, ejemplo:
+                "Se gasto un 20% en comida"
+        
+        6 - Crear funcion de objetivos de ahorro
+            - Permitir al usuario ingresar cuanto desea ahorrar y cuando gana por su sueldo.
+            - Basado en eso mostrar cuanto debe ahorrar por dia (o semana, a definir)
+            - Basado en los gastos de las etiquetas de gastos donde se deberia recortar mas para cumplir la meta. Ejemplo:
+                Reduciendo en x% los gastos de "comida" puees cumplir esta meta.
+            
+        9 - A checkear, crear funcion para hacer inversiones.
+            - Ingresar monto a invertir y crear algoritmo que calcuule la ganancia estimada.
+        
+        10 - Crear funcion para funcion de Gastos compartidos.
+            - Permitir al usuario ingresar cantidad de personas a repartir el gasto
+            - Ingresar Monto a pagar.
+            - Mostar cuanto debe pagar cada persona.
+
+    - FALTA AGREGAR:
+        1 - Matrices: Usar en lista de transacciones.
+        2 - Listas y sus funciones: ver en que parte usar
+        3 - Comprension de Listas: ver en que parte usar (Quizas en las lista de transacciones).
+        4 - Funciones Lambda y metodos (Map, Filter, Reduce): ver en que parte usar
+        5 - Slicing: Podemos usarlo cuando mostremos las transacciones hacer un "mostrar ultimas transacciones" o "mostrar primeras transacciones" siendo la misma lista volteandola con slicing
     - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opcioneS (menu por ejemplo)
     - '''
 

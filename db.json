@@ -7,21 +7,9 @@
             "contrasena": "A12345678",
             "email": "ssoler@test.com",
             "alias": "s_mp",
-            "transacciones": [
-                {"transaccion": "ingreso",
-                 "tipo": "deposito",
-                 "fecha": "2025-09-02",
-                 "monto": "2000",
-                 "currency": "ARS",
-                 "etiqueta": "Comida"
-                },
-                {"transaccion": "egreso",
-                 "tipo": "pago",
-                 "fecha": "2025-10-22",
-                 "monto": "5000",
-                 "currency": "ARS",
-                 "etiqueta": "Comida"
-                }
+            "transacciones": [ 
+                ["ingreso","deposito","2025-09-02",2000,"ARS","Comida"],
+                ["egreso","pago"     ,"2025-05-22",5000,"ARS","Comida"]
                  ],
             "saldo": 0
         },
@@ -32,20 +20,9 @@
             "contrasena": "B12345678",
             "email": "pluis@test.com",
             "alias": "luis_mp",
-            "transaciones": [
-                {"transaccion": "ingreso",
-                 "tipo": "pago",
-                 "fecha": "2025-09-02",
-                 "monto": "2000",
-                 "currency": "ARS",
-                 "etiqueta": "Comida"
-                },
-                {"tipo": "egreso",
-                 "fecha": "2025-10-22",
-                 "monto": "5000",
-                 "currency": "ARS",
-                 "etiqueta": "Comida"
-                }
+            "transacciones": [ 
+                ["ingreso","deposito","2025-09-02",2000,"ARS","Comida"],
+                ["egreso","pago"     ,"2025-05-22",5000,"ARS","Comida"]
                  ],
             "saldo": 0
         }
