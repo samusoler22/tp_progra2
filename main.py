@@ -2,7 +2,7 @@ import json
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg:
+        - Agus Goldberg: 5 y 6
         - Samu:
         - Benja:
         - Agus Lopez:
@@ -118,6 +118,36 @@ def realizar_transferencia(alias, monto):
     '''Funcion para realizar transferencia entre cuentas'''
     pass
 
+def control_gatos(fecha_inicio, fecha_final, usuario):  
+    '''punto 5'''
+    total = 0      
+    categorias = {} #ver diccionario para poner categorias
+
+    for i in usuario["transacciones"]: #es usuario o usuarioS?? VER
+        tipo = i[0]       # ingreso/egreso
+        fecha = i[2]      
+        monto = i[3]      
+        categoria = i[5]  
+
+        if tipo != "egreso":
+            continue  # ignoramos ingresos
+
+        if fecha >= fecha_inicio and fecha <= fecha_final:
+            total += monto
+            if categoria not in categorias:
+                categorias[categoria] = 0
+            categorias[categoria] += monto
+
+    if total == 0:
+        print(f"No hubo egresos entre {fecha_inicio} y {fecha_final}.")
+    else:
+        print(f"\nGASTOS desde {fecha_inicio} hasta {fecha_final}")
+        print(f"Total gastado: ${total}")
+        for cat, monto in categorias.items():
+            porcentaje = (monto / total) * 100
+            print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
+
+
 def resumen_cuenta(fecha_inicio, fecha_final, categoria):
     '''Funcion para descargar resumen de cuenta'''
     pass
@@ -159,7 +189,8 @@ def menu():
     1. Ingresar dinero\n
     2. Realizar transferencia\n
     3. Resumen de cuenta\n
-    4. Salir'''))
+    4. Control de Gastos\n
+    5. Salir'''))
     return opcion
 
 
@@ -199,6 +230,12 @@ def main():
     elif opcion == 3:
         resumen_cuenta()
     elif opcion == 4:
+        fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
+        fecha_final = int(input('Ingrese fecha final de periodo: '))
+        control_gatos(fecha_inicio, fecha_final, usuario)
+    elif opcion == 5:
         print("Gracias por usar el servicio")
         return
+
+
 main()
