@@ -4,7 +4,6 @@ from functools import reduce
 '''TODO: 
     Repartición de Tareas:
         - Agus Goldberg: 5 y 6
-<<<<<<< HEAD
         - Samu: 7 y 8
         - Benja: 3 y 4
         - Agus Lopez: 1 y 2
@@ -13,28 +12,26 @@ from functools import reduce
     -Agregar una funcion que quite saldo al usuario y se use en las otras funciones como transferencias o inversiones
         se le pasaria como argumento usuario (para ubicar en la DB), monto (para saber cuanto quitar) y motivo (para saber que tipo de transaccion es)
     - Quizas posibiliadad de comprar Stocks/Crypto
-=======
-        - Samu:
-        - Benja:
-        - Agus Lopez: 1 / 2 ../
->>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
 
     Tareas:
         1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
             - En la funcion "nuevo usuario" crear logica para validar los datos que ingresa el usuario.
             - Las funciones ya estan prehechas, agregar mas de ser necesario.
+            LISTO
 
         2. Crear funcion para ingresar dinero
             - Crear logica para agregar dinero a la cuenta del usuario en la funcion "ingresar_dinero".
             - Tener en cuenta que habria que agregar una transaccion en el usuario por cada ingreso.
             - Que se agregue el ingreso al saldo del usuario.
             - IMPORTANTE: Tener en cuenta que la parte de las transacciones es una matriz.
+            LISTO/REVISAR: CAMBIAR FORMATO FECHA SEGUN CRITERIO FUNCION CONTROL DE GASTOS
 
         3. Crear funcion para realizar transferencia.
             - Crear logica para realizar transferencia entre cuentas dentro de la funcion "realizar_transferencia"
             - Tener en cuenta que esta funcion usa dos parametros, uno es alias porque vamos a buscar el usuario a transferir en nuestro diccionario de usuarios
             - Tener en cuenta que el monto que se transfiere se resta del saldo del usuario que transfiere y se agregan las transacciones pertinentes.
-        
+            REVISAR BENJA
+            
         4. Crear funcion para mostrar resumen de cuenta
             - Crear logica en funcion "resumen_cuenta"
             - Por defecto mostrar transacciones del mes en curso o el mes anterior (a definir)
@@ -42,24 +39,29 @@ from functools import reduce
                 1-Mostrar resumen de transacciones entre un rango de fechas
                 2-Mostrar ultimos 5 transacciones (aca aplicamos slicing de la lista)
                 3-Mostrar primeras 5 transacciones del mes.
+            REVISAR BENJA
         
         5 - Crear funcion de Control de Gastos.
             - Crear logica donde se muestre gastos total del mes y estilo de gastos basado en las etiquetas de las transacciones de egreso, ejemplo:
                 "Se gasto un 20% en comida"
+            REVISAR: VER FORMATO FECHA
         
         6 - Crear funcion de objetivos de ahorro
             - Permitir al usuario ingresar cuanto desea ahorrar y cuando gana por su sueldo.
             - Basado en eso mostrar cuanto debe ahorrar por dia (o semana, a definir)
             - Basado en los gastos de las etiquetas de gastos donde se deberia recortar mas para cumplir la meta. Ejemplo:
                 Reduciendo en x% los gastos de "comida" puees cumplir esta meta.
+            LISTO
             
-        7 - A checkear, crear funcion para hacer inversiones.
+        7 - Crear funcion para hacer inversiones.
             - Ingresar monto a invertir y crear algoritmo que calcule la ganancia estimada.
+            LISTO
         
         8 - Crear funcion para funcion de Gastos compartidos.
             - Permitir al usuario ingresar cantidad de personas a repartir el gasto
             - Ingresar Monto a pagar.
             - Mostar cuanto debe pagar cada persona.
+            LISTO
 
     - FALTA AGREGAR:
         1 - Matrices: Usar en lista de transacciones.               LISTO   - en Gastos Compartidos y Control Gastos
@@ -86,8 +88,13 @@ def cargar_db():
             "email": "ssoler@test.com",
             "alias": "s_mp",
             "transacciones": [ 
-                ["ingreso","deposito","2025-09-02",2000,"ARS","Comida"],
-                ["egreso", "pago"    ,"2025-05-22",5000,"ARS","Comida"]
+                ["egreso","pago","2025-09-02",2000,"ARS","Comida"],
+                ["egreso", "pago"    ,"2025-05-22",5000,"ARS","Comida"],
+                ["egreso", "pago"    ,"2025-05-23",5000,"ARS","Entretenimiento"],
+                ["egreso", "pago"    ,"2025-05-24",5000,"ARS","Facultad"],
+                ["egreso", "pago"    ,"2025-05-25",5000,"ARS","Laburo"],
+                ["egreso", "pago"    ,"2025-05-26",5000,"ARS","Laburo"],
+                ["egreso", "pago"    ,"2025-05-26",5000,"ARS","Comida"]
                  ],
             "saldo": 7000
         }
@@ -97,56 +104,65 @@ def cargar_db():
 
 def nuevo_usuario(db_datos):
     '''Funcion para crear nuevo usuario con validaciones basicas'''
+    def validar_usuario_unico():
+        '''Funcion para validar que el usuario ingresado sea unico'''
+        valido = False
+        while valido == False:
+            nombre_usuario = input("Ingrese nombre de usuario: ")
+            # no puede estar vacío ni ser "salir"
+            if nombre_usuario == "" or nombre_usuario == "salir" or nombre_usuario == "SALIR":
+                print("El usuario no puede estar vacio ni ser 'salir'")
+                valido = False
+            # no puede repetirse
+            elif nombre_usuario in db_datos["usuarios"]:
+                print("El usuario ya existe")
+                valido = False
+            else:
+                valido = True
+        return nombre_usuario
+
+    def validar_contrasena_usuario():
+        '''Funcion para validar que la contraseña ingresada cumpla los requisitos de seguridad:
+            Una letra mayuscula, Al menos un numero, Minimo de 8 caracteres'''
+        valida_contra = False
+        while valida_contra == False:
+            contrasena = input("Ingrese contraseña (min 8, una mayuscula y un numero): ")
+
+            if len(contrasena) < 8:
+                print("La contraseña debe tener al menos 8 caracteres")
+            else:
+                tiene_mayus = 0
+                tiene_numero = 0
+                for c in contrasena:
+                    if c >= "A" and c <= "Z":
+                        tiene_mayus = 1
+                    if c >= "0" and c <= "9":
+                        tiene_numero = 1
+                if tiene_mayus == 0:
+                    print("Debe tener al menos una mayuscula")
+                elif tiene_numero == 0:
+                    print("Debe tener al menos un numero")
+                else:
+                    valida_contra = True
+        return contrasena
+
+    def validar_email():
+        '''Funcion para validar que el correo electronico ingresado sea valido'''
+        # validación de email
+        valido_email = False
+        while valido_email == False:
+            email = input("Ingrese email: ")
+            if "@" not in email or "." not in email:
+                print("El email no es valido")
+            else:
+                valido_email = True
+        return email
+
     nombre = input("Ingrese nombre completo: ")
     dni = input("Ingrese DNI: ")
-
-    # validación de nombre de usuario
-    valido = False
-    while valido == False:
-        nombre_usuario = input("Ingrese nombre de usuario: ")
-
-        # no puede estar vacío ni ser "salir"
-        if nombre_usuario == "" or nombre_usuario == "salir" or nombre_usuario == "SALIR":
-            print("El usuario no puede estar vacio ni ser 'salir'")
-            valido = False
-        # no puede repetirse
-        elif nombre_usuario in db_datos["usuarios"]:
-            print("El usuario ya existe")
-            valido = False
-        else:
-            valido = True
-
-    # validación de contraseña
-    valida_contra = False
-    while valida_contra == False:
-        contrasena = input("Ingrese contraseña (min 8, una mayuscula y un numero): ")
-
-        if len(contrasena) < 8:
-            print("La contraseña debe tener al menos 8 caracteres")
-        else:
-            tiene_mayus = 0
-            tiene_numero = 0
-            for c in contrasena:
-                if c >= "A" and c <= "Z":
-                    tiene_mayus = 1
-                if c >= "0" and c <= "9":
-                    tiene_numero = 1
-            if tiene_mayus == 0:
-                print("Debe tener al menos una mayuscula")
-            elif tiene_numero == 0:
-                print("Debe tener al menos un numero")
-            else:
-                valida_contra = True
-
-    # validación de email
-    valido_email = False
-    while valido_email == False:
-        email = input("Ingrese email: ")
-        if "@" not in email or "." not in email:
-            print("El email no es valido")
-        else:
-            valido_email = True
-
+    nombre_usuario = validar_usuario_unico()
+    contrasena = validar_contrasena_usuario()
+    email = validar_email()
     alias = input("Ingrese alias: ")
 
     usuario = {
@@ -163,57 +179,39 @@ def nuevo_usuario(db_datos):
     db_datos["usuarios"][nombre_usuario] = usuario
     print("Usuario creado correctamente")
 
-
-def ingresar_dinero(usuario):
+def ingresar_dinero(usuario, db_datos):
     '''Funcion para ingresar dinero a una cuenta'''
-
     monto_valido = False
     while monto_valido == False:
-        montoo_  = input("Ingrese monto a depositar: ")
-
-        es_numero = True
-        if montoo_ == "":
-            es_numero = False
+        montoo_  = int(input("Ingrese monto a depositar: "))
+        if montoo_ <= 0:
+            print("El monto debe ser mayor a 0")
         else:
-            for c in montoo_:
-                if c < "0" or c > "9":
-                    es_numero = False
-
-        if es_numero == False:
-            print("Monto invalido, ingrese solo numeros")
-        else:
-            monto = int(montoo_)
-            if monto <= 0:
-                print("El monto debe ser mayor a 0")
-            else:
-                monto_valido = True
+            monto_valido = True
 
     fecha = input("Ingrese fecha (AAAA-MM-DD): ")
     etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
     if etiqueta == "":
         etiqueta = "Varios"
 
-    transaccion = ["ingreso", "deposito", fecha, monto, "ARS", etiqueta]
+    transaccion = ["ingreso", "deposito", fecha, montoo_, "ARS", etiqueta]
+    db_datos['usuarios'][usuario['nombre_usuario']]['transacciones'].append(transaccion)
+    db_datos['usuarios'][usuario['nombre_usuario']]['saldo'] += montoo_
 
-    usuario["transacciones"].append(transaccion)
-    usuario["saldo"] = usuario["saldo"] + monto
-
-    print("Deposito registrado. Nuevo saldo:", usuario["saldo"])
+    print("Deposito registrado. Nuevo saldo:", db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
 
 def realizar_transferencia(alias, monto):
     '''Funcion para realizar transferencia entre cuentas'''
     pass
 
 def control_gatos(fecha_inicio, fecha_final, usuario):  
-
-
     '''punto 5'''
     total = 0      
     categorias = {} #ver diccionario para poner categorias
 
-    for i in usuario["transacciones"]: #es usuario o usuarioS?? VER
+    for i in usuario["transacciones"]:
         tipo = i[0]       # ingreso/egreso
-        fecha = i[2]      
+        fecha = i[2]      #"2025-09-02" 
         monto = i[3]      
         categoria = i[5]  
 
@@ -235,68 +233,43 @@ def control_gatos(fecha_inicio, fecha_final, usuario):
             porcentaje = (monto / total) * 100
             print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
 
-<<<<<<< HEAD
-=======
+def objetivo_ahorro(usuario, db_datos):
+    '''Funcion para crear objetivo de ahorro''' 
+    monto = int(input('Ingrese el monto que desea ahorrar (o escriba -1 para salir):'))
+    if monto == -1:
+            print("Volviendo al menú...")
+            return
+    while monto <= 0:
+        monto = int(input('Monto invalido, debe ser mayor a 0. Ingrese nuevamente'))
+    
+    motivo = input("Ingrese el motivo de este ahorro (ejemplo: viaje): ")
 
-def objetivo_ahorro(usuario):
-        while True:
-            monto = input('Ingrese el monto que desea ahorrar (o escriba "salir" para volver): ').lower()
-        
-            if monto == "salir":
-                print("Volviendo al menú anterior...")
-                return  
-        
-            if monto.isdigit():            # chequeo si son solo números
-                objetivo = int(monto)
-                if objetivo > 0:
-                    print("Objetivo registrado:", objetivo)
-                    break                  # sale del while, valor correcto
-                else:
-                    print("El monto debe ser mayor a 0")
-            else:
-                print("Monto inválido, ingrese solo números o escriba 'salir' ") 
-        
-        motivo = input("Ingrese el motivo de este ahorro (ejemplo: viaje): ")
+    periodo = int(input('¿En cuántos días quiere lograrlo? (o escriba -1 para"salir"): '))
+    if periodo == -1:
+            print("Volviendo al menú...")
+            return
+    while periodo <= 0 or periodo > 36500:
+            periodo = int(input('Periodo invalido, debe ser mayor a 0. Ingrese nuevamente'))
 
-        while True:
-            periodo = input('¿En cuántos días quiere lograrlo? (o escriba "salir" para volver): ').lower()
-            if periodo == "salir":
-                print("Volviendo al menú...")
-                return
-            if periodo.isdigit():
-                dias = int(periodo)
-                if dias > 0:
-                    break
-                else:
-                    print("Los días deben ser mayor a 0.")
-            else:
-                print("Valor inválido, ingrese solo números o escriba 'salir'.")
+    #calculo cuanto debe ahorra
+    saldo_actual = db_datos['usuarios'][usuario['nombre_usuario']]['saldo']
+    restante = monto - saldo_actual
+    if restante < 0:
+        print("\nFelicitaciones! Tienes el dinero disponible para cumplir el objetivo ")
+        print("Motivo: ", motivo)
+        print("Monto objetivo: ", monto)
+        print("Saldo actual: ", saldo_actual)
+    else:
+        ahorro_diario = restante / periodo
 
-        #calculo cuanto debe ahorra
-        saldo_actual = usuario["saldo"]
-        restante = objetivo - saldo_actual
-        if restante < 0:
-            print("\nFelicitaciones! Tienes el dinero disponible para cumplir el objetivo ")
-            print("Motivo: ", motivo)
-            print("Monto objetivo: ", objetivo)
-            print("Saldo actual: ", saldo_actual)
-            return 
-        ahorro_diario = restante / dias
-
-        #muestro resultados
         print("\n### OBJETIVO DE AHORRO ###")
         print("Motivo:", motivo)
-        print("Monto objetivo:", objetivo)
-        print("Días para lograrlo:", dias)
+        print("Monto objetivo:", monto)
+        print("Días para lograrlo:", periodo)
         print("Saldo actual:", saldo_actual)
         print("Monto restante:", restante)
         print("Debes ahorrar por día:", ahorro_diario)
 
-
-        
-        
-
->>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
 def resumen_cuenta(fecha_inicio, fecha_final, categoria):
     '''Funcion para descargar resumen de cuenta'''
     pass
@@ -400,7 +373,8 @@ def menu():
     4. Control de Gastos\n
     5. Calculo de Gastos Compartidos\n
     6. Inversión a Plazo Fijo\n
-    7. Salir'''))
+    7. Planificacion de Ahorro\n
+    8. Salir'''))
     return opcion
 
 def main():
@@ -430,12 +404,11 @@ def main():
                 print("Gracias por usar el servicio")
                 return
 
-<<<<<<< HEAD
-    menu_opcion = 0
-    while menu_opcion != 7:
+    menu_opcion = 1
+    while menu_opcion > 0 and menu_opcion < 9:
         menu_opcion = menu()
         if menu_opcion == 1:
-            ingresar_dinero()
+            ingresar_dinero(usuario, db_datos)
         elif menu_opcion == 2:
             realizar_transferencia()
         elif menu_opcion == 3:
@@ -456,24 +429,12 @@ def main():
             inversiones(inversion, db_datos, usuario)
             print(db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
         elif menu_opcion == 7:
+            objetivo_ahorro(usuario,db_datos)
+        elif menu_opcion == 8:
             print("Gracias por usar el servicio")
-=======
-
-    opcion = menu()
-    if opcion == 1:
-        ingresar_dinero(usuario)
-    elif opcion == 2:
-        realizar_transferencia(usuario)
-    elif opcion == 3:
-        resumen_cuenta(usuario)
-    elif opcion == 4:
-        fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
-        fecha_final = int(input('Ingrese fecha final de periodo: '))
-        control_gatos(fecha_inicio, fecha_final, usuario)
-    elif opcion == 5:
-        print("Gracias por usar el servicio")
-        return
-
->>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
+        seguir = input("Desea hacer alguna otra operacion? s/n")
+        if seguir == "n":
+            print("Gracias por usar el servicio")
+            menu_opcion = 100
 
 main()
