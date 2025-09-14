@@ -5,7 +5,7 @@ import json
         - Agus Goldberg: 5 y 6
         - Samu:
         - Benja:
-        - Agus Lopez:
+        - Agus Lopez: 1 / 2 ../
 
     Tareas:
         1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
@@ -70,49 +70,109 @@ def cargar_db():
     return db_datos
 
 def nuevo_usuario(db_datos):
-    '''Funcion para crear nuevo usuario'''
-    def validar_usuario_unico(usuario):
-        '''Funcion para validar que el usuario ingresado sea unico'''
-        #TODO: El usuario no puede ser "salir"
-        pass
-    def validar_contraseña_usuario(contraseña):
-        '''Funcion para validar que la contraseña ingresada cumpla los requisitos de seguridad:
-            Una letra mayuscula, Al menos un numero, Minimo de 8 caracteres'''
-        pass
-    def validar_email(email):
-        '''Funcion para validar que el correo electronico ingresado sea valido'''
-        pass 
-    def guardar_nuevo_usuario(datos_usuario):
-        '''Funcion para guardar los datos del nuevo usuario en la base de datos'''
-        pass
+    '''Funcion para crear nuevo usuario con validaciones basicas'''
+    nombre = input("Ingrese nombre completo: ")
+    dni = input("Ingrese DNI: ")
 
-    print("#### GENERAR NUEVO USUARIO ####")
-    nombre = input("Por favor ingrese nombre completo")
-    dni = input("Por favor ingrese numero de DNI")
-    nombre_usuario = input("Por favor ingrese nombre de usuario")
-    contrasena = input('''Por favor ingrese una contraseña que cumpla las siguientes caractesticas:
-                            \n - Una letra mayuscula
-                            \n - Al menos un numero 
-                            \n - Minimo de 8 caracteres''')
-    email = input("Ingrese un correo electronico")
-    alias = input(" Por favor ingrese un alias para su cuenta")
+    # validación de nombre de usuario
+    valido = False
+    while valido == False:
+        nombre_usuario = input("Ingrese nombre de usuario: ")
+
+        # no puede estar vacío ni ser "salir"
+        if nombre_usuario == "" or nombre_usuario == "salir" or nombre_usuario == "SALIR":
+            print("El usuario no puede estar vacio ni ser 'salir'")
+            valido = False
+        # no puede repetirse
+        elif nombre_usuario in db_datos["usuarios"]:
+            print("El usuario ya existe")
+            valido = False
+        else:
+            valido = True
+
+    # validación de contraseña
+    valida_contra = False
+    while valida_contra == False:
+        contrasena = input("Ingrese contraseña (min 8, una mayuscula y un numero): ")
+
+        if len(contrasena) < 8:
+            print("La contraseña debe tener al menos 8 caracteres")
+        else:
+            tiene_mayus = 0
+            tiene_numero = 0
+            for c in contrasena:
+                if c >= "A" and c <= "Z":
+                    tiene_mayus = 1
+                if c >= "0" and c <= "9":
+                    tiene_numero = 1
+            if tiene_mayus == 0:
+                print("Debe tener al menos una mayuscula")
+            elif tiene_numero == 0:
+                print("Debe tener al menos un numero")
+            else:
+                valida_contra = True
+
+    # validación de email
+    valido_email = False
+    while valido_email == False:
+        email = input("Ingrese email: ")
+        if "@" not in email or "." not in email:
+            print("El email no es valido")
+        else:
+            valido_email = True
+
+    alias = input("Ingrese alias: ")
 
     usuario = {
         "nombre": nombre,
-        "dni":dni,
-        "nombre_usuario":nombre_usuario,
-        "contrasena":contrasena,
-        "email":email,
-        "alias":alias,
+        "dni": dni,
+        "nombre_usuario": nombre_usuario,
+        "contrasena": contrasena,
+        "email": email,
+        "alias": alias,
         "transacciones": [],
-        "saldo":0
+        "saldo": 0
     }
 
     db_datos["usuarios"][nombre_usuario] = usuario
+    print("Usuario creado correctamente")
+
 
 def ingresar_dinero(usuario):
     '''Funcion para ingresar dinero a una cuenta'''
-    pass
+
+    monto_valido = False
+    while monto_valido == False:
+        montoo_  = input("Ingrese monto a depositar: ")
+
+        es_numero = True
+        if montoo_ == "":
+            es_numero = False
+        else:
+            for c in montoo_:
+                if c < "0" or c > "9":
+                    es_numero = False
+
+        if es_numero == False:
+            print("Monto invalido, ingrese solo numeros")
+        else:
+            monto = int(montoo_)
+            if monto <= 0:
+                print("El monto debe ser mayor a 0")
+            else:
+                monto_valido = True
+
+    fecha = input("Ingrese fecha (AAAA-MM-DD): ")
+    etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
+    if etiqueta == "":
+        etiqueta = "Varios"
+
+    transaccion = ["ingreso", "deposito", fecha, monto, "ARS", etiqueta]
+
+    usuario["transacciones"].append(transaccion)
+    usuario["saldo"] = usuario["saldo"] + monto
+
+    print("Deposito registrado. Nuevo saldo:", usuario["saldo"])
 
 def realizar_transferencia(alias, monto):
     '''Funcion para realizar transferencia entre cuentas'''
@@ -224,11 +284,11 @@ def main():
 
     opcion = menu()
     if opcion == 1:
-        ingresar_dinero()
+        ingresar_dinero(usuario)
     elif opcion == 2:
-        realizar_transferencia()
+        realizar_transferencia(usuario)
     elif opcion == 3:
-        resumen_cuenta()
+        resumen_cuenta(usuario)
     elif opcion == 4:
         fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
         fecha_final = int(input('Ingrese fecha final de periodo: '))
