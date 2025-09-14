@@ -179,6 +179,8 @@ def realizar_transferencia(alias, monto):
     pass
 
 def control_gatos(fecha_inicio, fecha_final, usuario):  
+
+
     '''punto 5'''
     total = 0      
     categorias = {} #ver diccionario para poner categorias
@@ -207,6 +209,64 @@ def control_gatos(fecha_inicio, fecha_final, usuario):
             porcentaje = (monto / total) * 100
             print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
 
+
+def objetivo_ahorro(usuario):
+        while True:
+            monto = input('Ingrese el monto que desea ahorrar (o escriba "salir" para volver): ').lower()
+        
+            if monto == "salir":
+                print("Volviendo al menú anterior...")
+                return  
+        
+            if monto.isdigit():            # chequeo si son solo números
+                objetivo = int(monto)
+                if objetivo > 0:
+                    print("Objetivo registrado:", objetivo)
+                    break                  # sale del while, valor correcto
+                else:
+                    print("El monto debe ser mayor a 0")
+            else:
+                print("Monto inválido, ingrese solo números o escriba 'salir' ") 
+        
+        motivo = input("Ingrese el motivo de este ahorro (ejemplo: viaje): ")
+
+        while True:
+            periodo = input('¿En cuántos días quiere lograrlo? (o escriba "salir" para volver): ').lower()
+            if periodo == "salir":
+                print("Volviendo al menú...")
+                return
+            if periodo.isdigit():
+                dias = int(periodo)
+                if dias > 0:
+                    break
+                else:
+                    print("Los días deben ser mayor a 0.")
+            else:
+                print("Valor inválido, ingrese solo números o escriba 'salir'.")
+
+        #calculo cuanto debe ahorra
+        saldo_actual = usuario["saldo"]
+        restante = objetivo - saldo_actual
+        if restante < 0:
+            print("\nFelicitaciones! Tienes el dinero disponible para cumplir el objetivo ")
+            print("Motivo: ", motivo)
+            print("Monto objetivo: ", objetivo)
+            print("Saldo actual: ", saldo_actual)
+            return 
+        ahorro_diario = restante / dias
+
+        #muestro resultados
+        print("\n### OBJETIVO DE AHORRO ###")
+        print("Motivo:", motivo)
+        print("Monto objetivo:", objetivo)
+        print("Días para lograrlo:", dias)
+        print("Saldo actual:", saldo_actual)
+        print("Monto restante:", restante)
+        print("Debes ahorrar por día:", ahorro_diario)
+
+
+        
+        
 
 def resumen_cuenta(fecha_inicio, fecha_final, categoria):
     '''Funcion para descargar resumen de cuenta'''
