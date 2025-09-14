@@ -4,6 +4,7 @@ from functools import reduce
 '''TODO: 
     Repartición de Tareas:
         - Agus Goldberg: 5 y 6
+<<<<<<< HEAD
         - Samu: 7 y 8
         - Benja: 3 y 4
         - Agus Lopez: 1 y 2
@@ -12,6 +13,11 @@ from functools import reduce
     -Agregar una funcion que quite saldo al usuario y se use en las otras funciones como transferencias o inversiones
         se le pasaria como argumento usuario (para ubicar en la DB), monto (para saber cuanto quitar) y motivo (para saber que tipo de transaccion es)
     - Quizas posibiliadad de comprar Stocks/Crypto
+=======
+        - Samu:
+        - Benja:
+        - Agus Lopez: 1 / 2 ../
+>>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
 
     Tareas:
         1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
@@ -90,55 +96,117 @@ def cargar_db():
     return db_datos
 
 def nuevo_usuario(db_datos):
-    '''Funcion para crear nuevo usuario'''
-    def validar_usuario_unico(usuario):
-        '''Funcion para validar que el usuario ingresado sea unico'''
-        #TODO: El usuario no puede ser "salir"
-        pass
-    def validar_contraseña_usuario(contraseña):
-        '''Funcion para validar que la contraseña ingresada cumpla los requisitos de seguridad:
-            Una letra mayuscula, Al menos un numero, Minimo de 8 caracteres'''
-        pass
-    def validar_email(email):
-        '''Funcion para validar que el correo electronico ingresado sea valido'''
-        pass 
-    def guardar_nuevo_usuario(datos_usuario):
-        '''Funcion para guardar los datos del nuevo usuario en la base de datos'''
-        pass
+    '''Funcion para crear nuevo usuario con validaciones basicas'''
+    nombre = input("Ingrese nombre completo: ")
+    dni = input("Ingrese DNI: ")
 
-    print("#### GENERAR NUEVO USUARIO ####")
-    nombre = input("Por favor ingrese nombre completo")
-    dni = input("Por favor ingrese numero de DNI")
-    nombre_usuario = input("Por favor ingrese nombre de usuario")
-    contrasena = input('''Por favor ingrese una contraseña que cumpla las siguientes caractesticas:
-                            \n - Una letra mayuscula
-                            \n - Al menos un numero 
-                            \n - Minimo de 8 caracteres''')
-    email = input("Ingrese un correo electronico")
-    alias = input(" Por favor ingrese un alias para su cuenta")
+    # validación de nombre de usuario
+    valido = False
+    while valido == False:
+        nombre_usuario = input("Ingrese nombre de usuario: ")
+
+        # no puede estar vacío ni ser "salir"
+        if nombre_usuario == "" or nombre_usuario == "salir" or nombre_usuario == "SALIR":
+            print("El usuario no puede estar vacio ni ser 'salir'")
+            valido = False
+        # no puede repetirse
+        elif nombre_usuario in db_datos["usuarios"]:
+            print("El usuario ya existe")
+            valido = False
+        else:
+            valido = True
+
+    # validación de contraseña
+    valida_contra = False
+    while valida_contra == False:
+        contrasena = input("Ingrese contraseña (min 8, una mayuscula y un numero): ")
+
+        if len(contrasena) < 8:
+            print("La contraseña debe tener al menos 8 caracteres")
+        else:
+            tiene_mayus = 0
+            tiene_numero = 0
+            for c in contrasena:
+                if c >= "A" and c <= "Z":
+                    tiene_mayus = 1
+                if c >= "0" and c <= "9":
+                    tiene_numero = 1
+            if tiene_mayus == 0:
+                print("Debe tener al menos una mayuscula")
+            elif tiene_numero == 0:
+                print("Debe tener al menos un numero")
+            else:
+                valida_contra = True
+
+    # validación de email
+    valido_email = False
+    while valido_email == False:
+        email = input("Ingrese email: ")
+        if "@" not in email or "." not in email:
+            print("El email no es valido")
+        else:
+            valido_email = True
+
+    alias = input("Ingrese alias: ")
 
     usuario = {
         "nombre": nombre,
-        "dni":dni,
-        "nombre_usuario":nombre_usuario,
-        "contrasena":contrasena,
-        "email":email,
-        "alias":alias,
+        "dni": dni,
+        "nombre_usuario": nombre_usuario,
+        "contrasena": contrasena,
+        "email": email,
+        "alias": alias,
         "transacciones": [],
-        "saldo":0
+        "saldo": 0
     }
 
     db_datos["usuarios"][nombre_usuario] = usuario
+    print("Usuario creado correctamente")
+
 
 def ingresar_dinero(usuario):
     '''Funcion para ingresar dinero a una cuenta'''
-    pass
+
+    monto_valido = False
+    while monto_valido == False:
+        montoo_  = input("Ingrese monto a depositar: ")
+
+        es_numero = True
+        if montoo_ == "":
+            es_numero = False
+        else:
+            for c in montoo_:
+                if c < "0" or c > "9":
+                    es_numero = False
+
+        if es_numero == False:
+            print("Monto invalido, ingrese solo numeros")
+        else:
+            monto = int(montoo_)
+            if monto <= 0:
+                print("El monto debe ser mayor a 0")
+            else:
+                monto_valido = True
+
+    fecha = input("Ingrese fecha (AAAA-MM-DD): ")
+    etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
+    if etiqueta == "":
+        etiqueta = "Varios"
+
+    transaccion = ["ingreso", "deposito", fecha, monto, "ARS", etiqueta]
+
+    usuario["transacciones"].append(transaccion)
+    usuario["saldo"] = usuario["saldo"] + monto
+
+    print("Deposito registrado. Nuevo saldo:", usuario["saldo"])
 
 def realizar_transferencia(alias, monto):
     '''Funcion para realizar transferencia entre cuentas'''
     pass
 
 def control_gatos(fecha_inicio, fecha_final, usuario):  
+
+
     '''punto 5'''
     total = 0      
     categorias = {} #ver diccionario para poner categorias
@@ -167,6 +235,68 @@ def control_gatos(fecha_inicio, fecha_final, usuario):
             porcentaje = (monto / total) * 100
             print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
 
+<<<<<<< HEAD
+=======
+
+def objetivo_ahorro(usuario):
+        while True:
+            monto = input('Ingrese el monto que desea ahorrar (o escriba "salir" para volver): ').lower()
+        
+            if monto == "salir":
+                print("Volviendo al menú anterior...")
+                return  
+        
+            if monto.isdigit():            # chequeo si son solo números
+                objetivo = int(monto)
+                if objetivo > 0:
+                    print("Objetivo registrado:", objetivo)
+                    break                  # sale del while, valor correcto
+                else:
+                    print("El monto debe ser mayor a 0")
+            else:
+                print("Monto inválido, ingrese solo números o escriba 'salir' ") 
+        
+        motivo = input("Ingrese el motivo de este ahorro (ejemplo: viaje): ")
+
+        while True:
+            periodo = input('¿En cuántos días quiere lograrlo? (o escriba "salir" para volver): ').lower()
+            if periodo == "salir":
+                print("Volviendo al menú...")
+                return
+            if periodo.isdigit():
+                dias = int(periodo)
+                if dias > 0:
+                    break
+                else:
+                    print("Los días deben ser mayor a 0.")
+            else:
+                print("Valor inválido, ingrese solo números o escriba 'salir'.")
+
+        #calculo cuanto debe ahorra
+        saldo_actual = usuario["saldo"]
+        restante = objetivo - saldo_actual
+        if restante < 0:
+            print("\nFelicitaciones! Tienes el dinero disponible para cumplir el objetivo ")
+            print("Motivo: ", motivo)
+            print("Monto objetivo: ", objetivo)
+            print("Saldo actual: ", saldo_actual)
+            return 
+        ahorro_diario = restante / dias
+
+        #muestro resultados
+        print("\n### OBJETIVO DE AHORRO ###")
+        print("Motivo:", motivo)
+        print("Monto objetivo:", objetivo)
+        print("Días para lograrlo:", dias)
+        print("Saldo actual:", saldo_actual)
+        print("Monto restante:", restante)
+        print("Debes ahorrar por día:", ahorro_diario)
+
+
+        
+        
+
+>>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
 def resumen_cuenta(fecha_inicio, fecha_final, categoria):
     '''Funcion para descargar resumen de cuenta'''
     pass
@@ -300,6 +430,7 @@ def main():
                 print("Gracias por usar el servicio")
                 return
 
+<<<<<<< HEAD
     menu_opcion = 0
     while menu_opcion != 7:
         menu_opcion = menu()
@@ -326,5 +457,23 @@ def main():
             print(db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
         elif menu_opcion == 7:
             print("Gracias por usar el servicio")
+=======
+
+    opcion = menu()
+    if opcion == 1:
+        ingresar_dinero(usuario)
+    elif opcion == 2:
+        realizar_transferencia(usuario)
+    elif opcion == 3:
+        resumen_cuenta(usuario)
+    elif opcion == 4:
+        fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
+        fecha_final = int(input('Ingrese fecha final de periodo: '))
+        control_gatos(fecha_inicio, fecha_final, usuario)
+    elif opcion == 5:
+        print("Gracias por usar el servicio")
+        return
+
+>>>>>>> fdbfec926a18c54a1beb79776ba2075a95de4fbd
 
 main()
