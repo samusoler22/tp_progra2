@@ -1,11 +1,17 @@
 import json
+from functools import reduce
 
 '''TODO: 
     Repartición de Tareas:
         - Agus Goldberg: 5 y 6
-        - Samu:
-        - Benja:
-        - Agus Lopez:
+        - Samu: 7 y 8
+        - Benja: 3 y 4
+        - Agus Lopez: 1 y 2
+
+    Ideas mejoras:
+    -Agregar una funcion que quite saldo al usuario y se use en las otras funciones como transferencias o inversiones
+        se le pasaria como argumento usuario (para ubicar en la DB), monto (para saber cuanto quitar) y motivo (para saber que tipo de transaccion es)
+    - Quizas posibiliadad de comprar Stocks/Crypto
 
     Tareas:
         1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
@@ -41,21 +47,21 @@ import json
             - Basado en los gastos de las etiquetas de gastos donde se deberia recortar mas para cumplir la meta. Ejemplo:
                 Reduciendo en x% los gastos de "comida" puees cumplir esta meta.
             
-        9 - A checkear, crear funcion para hacer inversiones.
-            - Ingresar monto a invertir y crear algoritmo que calcuule la ganancia estimada.
+        7 - A checkear, crear funcion para hacer inversiones.
+            - Ingresar monto a invertir y crear algoritmo que calcule la ganancia estimada.
         
-        10 - Crear funcion para funcion de Gastos compartidos.
+        8 - Crear funcion para funcion de Gastos compartidos.
             - Permitir al usuario ingresar cantidad de personas a repartir el gasto
             - Ingresar Monto a pagar.
             - Mostar cuanto debe pagar cada persona.
 
     - FALTA AGREGAR:
-        1 - Matrices: Usar en lista de transacciones.
-        2 - Listas y sus funciones: ver en que parte usar
-        3 - Comprension de Listas: ver en que parte usar (Quizas en las lista de transacciones).
-        4 - Funciones Lambda y metodos (Map, Filter, Reduce): ver en que parte usar
+        1 - Matrices: Usar en lista de transacciones.               LISTO   - en Gastos Compartidos y Control Gastos
+        2 - Listas y sus funciones: ver en que parte usar.          REVISAR - Ingresar Dinero (al menos un append)
+        3 - Comprension de Listas:                                  LISTO   - en Gastos Compartidos
+        4 - Funciones Lambda y metodos (Map, Filter, Reduce)        LISTO   - en Gastos Compartidos
         5 - Slicing: Podemos usarlo cuando mostremos las transacciones hacer un "mostrar ultimas transacciones" o "mostrar primeras transacciones" siendo la misma lista volteandola con slicing
-    - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opcioneS (menu por ejemplo)
+    - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
     - '''
 
 def cargar_db():
@@ -65,7 +71,21 @@ def cargar_db():
     #return db_datos
 
     db_datos = {
-        "usuarios":{}
+        "usuarios":{
+            "uade_samuel": {
+            "nombre": "Samuel Soler",
+            "dni": "95918716",
+            "nombre_usuario": "uade_samuel",
+            "contrasena": "test",
+            "email": "ssoler@test.com",
+            "alias": "s_mp",
+            "transacciones": [ 
+                ["ingreso","deposito","2025-09-02",2000,"ARS","Comida"],
+                ["egreso", "pago"    ,"2025-05-22",5000,"ARS","Comida"]
+                 ],
+            "saldo": 7000
+        }
+        }
     }
     return db_datos
 
@@ -147,7 +167,6 @@ def control_gatos(fecha_inicio, fecha_final, usuario):
             porcentaje = (monto / total) * 100
             print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
 
-
 def resumen_cuenta(fecha_inicio, fecha_final, categoria):
     '''Funcion para descargar resumen de cuenta'''
     pass
@@ -183,6 +202,65 @@ def log_in(db_datos):
         print(f"Cantidad de intentos restantes ({usuario_retry}/5)")
         usuario_retry += 1
 
+def gastos_compartidos():
+    '''Funcion para basado en un gasto, calcular cuanto debe pagar cada persona
+    - Permitir al usuario ingresar cantidad de personas a repartir el gasto
+    - Ingresar Monto a pagar.
+    - Mostar cuanto debe pagar cada persona.'''
+
+    print("#### Gastos Compartidos ####")
+    monto = int(input("Ingrese monto a repartir"))
+    cant_personas = int(input("Ingrese cantidad de personas a repartir el gasto"))
+    opcion = ""
+    while opcion != "s" and opcion != "n":
+        opcion = input("Desea que el gasto se divida equitativamente? s/n: ")
+        if opcion != "s" and opcion != "n":
+            print("Opción inválida, seleccione s para Sí, n para No")
+    if opcion == "n":
+        datos = [[input(f"Nombre de la persona {persona+1}"), int(input(f"Ingrese porcentaje que debe abonar (Solo el numero)"))] for persona in range(cant_personas)]
+        porcentajes = [dato[1] for dato in datos]
+        porcentaje_total = reduce(lambda acumulador, porcentaje: acumulador + porcentaje[1], datos, 0)
+        while porcentaje_total != 100:
+            print("El Porcentaje de reparticion no es 100%, de quien desea modificar el porcentaje a pagar?")
+            for persona in range(len(datos)):
+                print(f"Persona {persona+1}: {datos[persona][0]} - {datos[persona][1]}%")
+            opcion = 0
+            while opcion < 1 or opcion > cant_personas:
+                opcion = int(input("Ingrese numero de persona: "))
+                if opcion < 1 or opcion > cant_personas:
+                    print("Opcion no valida, ingrese un numero correcto")
+            nuevo_porcentaje = int(input("Ingrese nuevo porcentaje: "))
+            datos[opcion-1][1] = nuevo_porcentaje
+            porcentaje_total = reduce(lambda acumulador, porcentaje: acumulador + porcentaje[1], datos, 0)
+        for persona in range(len(datos)):
+            print(f"{datos[persona][0]} debe abonar el {datos[persona][1]}% que es ${monto*datos[persona][1]/100}")
+    elif opcion == "s":
+           print(f"Cada persona debe abonar ${monto/cant_personas}")    
+             
+def inversiones(inversion, db_datos, usuario):
+    '''Funcion para hacer inversiones a plazo fijo
+    TOOD: Agregar cantidad de dias para el plazos fijo y calcular el interes basado en esto(30 dias, 60 dias)'''
+    TASA_ANUAL = 0.50
+    tasa_mensual = TASA_ANUAL/12
+    monto = inversion
+    print("Resumen inversion a final del año\nMes / Monto acumulado:")
+    for mes in range(1,13):
+        interes = monto * tasa_mensual
+        monto += interes
+        print(f"{mes} / {monto}")
+    
+    opcion = ""
+    while opcion != "s" and opcion != "n":
+        opcion = input("Desea Confirmar la operación? s/n: ")
+        if opcion != "s" and opcion != "n":
+            print("Opción inválida, seleccione s para Sí, n para No")
+    if opcion == "s":
+        #TODO: Agregar funcion universal para quitar saldo
+        db_datos['usuarios'][usuario['nombre_usuario']]['saldo'] -= inversion
+        print("Operación confirmada")
+    elif opcion == "n":
+        print("Operación cancelada")
+
 def menu():
     '''Funcion para mostrar menu'''
     opcion = int(input('''##### MENU ##### \n
@@ -190,9 +268,10 @@ def menu():
     2. Realizar transferencia\n
     3. Resumen de cuenta\n
     4. Control de Gastos\n
-    5. Salir'''))
+    5. Calculo de Gastos Compartidos\n
+    6. Inversión a Plazo Fijo\n
+    7. Salir'''))
     return opcion
-
 
 def main():
     '''Funcion principal que ejecuta el codigo'''
@@ -221,21 +300,31 @@ def main():
                 print("Gracias por usar el servicio")
                 return
 
-
-    opcion = menu()
-    if opcion == 1:
-        ingresar_dinero()
-    elif opcion == 2:
-        realizar_transferencia()
-    elif opcion == 3:
-        resumen_cuenta()
-    elif opcion == 4:
-        fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
-        fecha_final = int(input('Ingrese fecha final de periodo: '))
-        control_gatos(fecha_inicio, fecha_final, usuario)
-    elif opcion == 5:
-        print("Gracias por usar el servicio")
-        return
-
+    menu_opcion = 0
+    while menu_opcion != 7:
+        menu_opcion = menu()
+        if menu_opcion == 1:
+            ingresar_dinero()
+        elif menu_opcion == 2:
+            realizar_transferencia()
+        elif menu_opcion == 3:
+            resumen_cuenta()
+        elif menu_opcion == 4:
+            fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
+            fecha_final = int(input('Ingrese fecha final de periodo: '))
+            control_gatos(fecha_inicio, fecha_final, usuario)
+        elif menu_opcion == 5:
+            gastos_compartidos()
+        elif menu_opcion == 6:
+            print(f"Su saldo es {usuario['saldo']}")
+            inversion = 0
+            while inversion <= 0 or inversion > usuario['saldo']:
+                inversion = int(input("Ingrese monto a invertir: "))
+                if inversion <= 0 or inversion > usuario['saldo']:
+                    print(f"Monto invalido, ingrese monto mayor a 0 y menor a su saldo actual que es {usuario['saldo']}")
+            inversiones(inversion, db_datos, usuario)
+            print(db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
+        elif menu_opcion == 7:
+            print("Gracias por usar el servicio")
 
 main()

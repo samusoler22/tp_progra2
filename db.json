@@ -4,12 +4,12 @@
             "nombre": "Samuel Soler",
             "dni": "95918716",
             "nombre_usuario": "uade_samuel",
-            "contrasena": "A12345678",
+            "contrasena": "test",
             "email": "ssoler@test.com",
             "alias": "s_mp",
             "transacciones": [ 
                 ["ingreso","deposito","2025-09-02",2000,"ARS","Comida"],
-                ["egreso","pago"     ,"2025-05-22",5000,"ARS","Comida"]
+                ["egreso", "pago"    ,"2025-05-22",5000,"ARS","Comida"]
                  ],
             "saldo": 0
         },
