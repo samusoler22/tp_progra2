@@ -1,5 +1,6 @@
 import json
 from functools import reduce
+from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
@@ -31,7 +32,7 @@ from functools import reduce
             - Tener en cuenta que esta funcion usa dos parametros, uno es alias porque vamos a buscar el usuario a transferir en nuestro diccionario de usuarios
             - Tener en cuenta que el monto que se transfiere se resta del saldo del usuario que transfiere y se agregan las transacciones pertinentes.
             REVISAR BENJA
-            
+
         4. Crear funcion para mostrar resumen de cuenta
             - Crear logica en funcion "resumen_cuenta"
             - Por defecto mostrar transacciones del mes en curso o el mes anterior (a definir)
@@ -65,10 +66,10 @@ from functools import reduce
 
     - FALTA AGREGAR:
         1 - Matrices: Usar en lista de transacciones.               LISTO   - en Gastos Compartidos y Control Gastos
-        2 - Listas y sus funciones: ver en que parte usar.          REVISAR - Ingresar Dinero (al menos un append)
+        2 - Listas y sus funciones: ver en que parte usar.          LISTO   - Ingresar Dinero
         3 - Comprension de Listas:                                  LISTO   - en Gastos Compartidos
         4 - Funciones Lambda y metodos (Map, Filter, Reduce)        LISTO   - en Gastos Compartidos
-        5 - Slicing: Podemos usarlo cuando mostremos las transacciones hacer un "mostrar ultimas transacciones" o "mostrar primeras transacciones" siendo la misma lista volteandola con slicing
+        5 - Slicing:                                                LISTO   - en Resumen de Cuenta
     - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
     - '''
 
@@ -158,6 +159,7 @@ def nuevo_usuario(db_datos):
                 valido_email = True
         return email
 
+    print("#### CREANDO NUEVO USUARIO ####")
     nombre = input("Ingrese nombre completo: ")
     dni = input("Ingrese DNI: ")
     nombre_usuario = validar_usuario_unico()
@@ -179,8 +181,9 @@ def nuevo_usuario(db_datos):
     db_datos["usuarios"][nombre_usuario] = usuario
     print("Usuario creado correctamente")
 
-def ingresar_dinero(usuario, db_datos):
+def ingresar_dinero(usuario):
     '''Funcion para ingresar dinero a una cuenta'''
+    print("#### INGRESANDO DINERO ####")
     monto_valido = False
     while monto_valido == False:
         montoo_  = int(input("Ingrese monto a depositar: "))
@@ -195,17 +198,57 @@ def ingresar_dinero(usuario, db_datos):
         etiqueta = "Varios"
 
     transaccion = ["ingreso", "deposito", fecha, montoo_, "ARS", etiqueta]
-    db_datos['usuarios'][usuario['nombre_usuario']]['transacciones'].append(transaccion)
-    db_datos['usuarios'][usuario['nombre_usuario']]['saldo'] += montoo_
+    usuario['transacciones'].append(transaccion)
+    usuario['saldo'] += montoo_
 
-    print("Deposito registrado. Nuevo saldo:", db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
+    print("Deposito registrado. Nuevo saldo:", usuario['saldo'])
 
-def realizar_transferencia(alias, monto):
+def realizar_transferencia(usuario, db_datos):
     '''Funcion para realizar transferencia entre cuentas'''
-    pass
+    print("#### TRANSFERENCIA ####")
+    flag = True
+    while flag:
+        alias_destino = input("Ingrese alias del destinatario: ")
+        # Buscar usuario destino por alias
+        usuario_destino = None
+        for u in db_datos["usuarios"].keys():
+            if db_datos["usuarios"][u]['alias'] == alias_destino and usuario['alias'] != alias_destino:
+                usuario_destino = db_datos["usuarios"][u]
+                flag = False
+        
+        if usuario['alias'] == alias_destino:
+            print("No se puede transferir a la misma cuenta de donde se hace la transferencia")
+        elif usuario_destino is None:
+            print("El alias ingresado no existe. Ingreselo nuevamente")
+    
+    monto = 0
+    while monto <= 0 or usuario["saldo"] < monto:
+        monto = int(input("Ingrese monto a transferir: "))
+        if monto <= 0:
+            print("El monto debe ser mayor a 0.")
+        elif usuario["saldo"] < monto:
+            print("Saldo insuficiente para realizar la transferencia.")
 
-def control_gatos(fecha_inicio, fecha_final, usuario):  
-    '''punto 5'''
+    
+    # Al no poder utilizar la libreria datetime por no ser parte de lo visto en clases
+    #solicitamos el ingres de la fecha de forma manual
+    fecha = input("Ingrese fecha (AAAA-MM-DD): ")
+
+    # Restar del usuario emisor
+    usuario["saldo"] -= monto
+    transaccion_emisor = ["egreso", "transferencia", fecha, monto, "ARS", "Transferencia a " + usuario_destino["nombre_usuario"]]
+    usuario["transacciones"].append(transaccion_emisor)
+
+    # Sumar al usuario receptor
+    usuario_destino["saldo"] += monto
+    transaccion_destino = ["ingreso", "transferencia", fecha, monto, "ARS", "Transferencia de " + usuario["nombre_usuario"]]
+    usuario_destino["transacciones"].append(transaccion_destino)
+
+    print(f"Transferencia realizada con éxito. Nuevo saldo: {usuario['saldo']}")
+
+def control_gatos(fecha_inicio, fecha_final, usuario):  #Fix
+    '''Funcion para hacer analisis de gastos'''
+    print("#### CONTROL DE GASTOS ####")
     total = 0      
     categorias = {} #ver diccionario para poner categorias
 
@@ -233,8 +276,9 @@ def control_gatos(fecha_inicio, fecha_final, usuario):
             porcentaje = (monto / total) * 100
             print(f"- {cat}: ${monto} ({porcentaje:.2f}%)")
 
-def objetivo_ahorro(usuario, db_datos):
-    '''Funcion para crear objetivo de ahorro''' 
+def objetivo_ahorro(usuario):
+    '''Funcion para crear objetivo de ahorro'''
+    print("#### PLANIFICACION DE AHORRO ####") 
     monto = int(input('Ingrese el monto que desea ahorrar (o escriba -1 para salir):'))
     if monto == -1:
             print("Volviendo al menú...")
@@ -252,7 +296,7 @@ def objetivo_ahorro(usuario, db_datos):
             periodo = int(input('Periodo invalido, debe ser mayor a 0. Ingrese nuevamente'))
 
     #calculo cuanto debe ahorra
-    saldo_actual = db_datos['usuarios'][usuario['nombre_usuario']]['saldo']
+    saldo_actual = usuario['saldo']
     restante = monto - saldo_actual
     if restante < 0:
         print("\nFelicitaciones! Tienes el dinero disponible para cumplir el objetivo ")
@@ -270,13 +314,54 @@ def objetivo_ahorro(usuario, db_datos):
         print("Monto restante:", restante)
         print("Debes ahorrar por día:", ahorro_diario)
 
-def resumen_cuenta(fecha_inicio, fecha_final, categoria):
-    '''Funcion para descargar resumen de cuenta'''
-    pass
+def resumen_cuenta(usuario):
+    '''Funcion para mostrar resumen de cuenta'''
+    print("#### RESUMEN DE CUENTA ####")
+    print(f"Saldo actual: {usuario['saldo']} ARS")
+    print("Transacciones del mes actual:\n")
+
+    # Mostrar las transacciones del mes actual
+    hoy = datetime.today().strftime("%Y-%m")
+    trans_mes = [t for t in usuario["transacciones"] if t[2].startswith(hoy)]
+
+    if len(trans_mes) == 0:
+        print("No hay transacciones este mes.")
+    else:
+        for t in trans_mes:
+            print(t)
+
+    print("\nOpciones:")
+    print("1 - Mostrar transacciones entre rango de fechas")
+    print("2 - Mostrar últimas 5 transacciones")
+    print("3 - Mostrar primeras 5 transacciones del mes")
+    opcion = input("Seleccione una opción: ")
+
+    if opcion == "1":
+        f_inicio = input("Ingrese fecha de inicio (AAAA-MM-DD): ")
+        f_final = input("Ingrese fecha final (AAAA-MM-DD): ")
+        trans_rango = [t for t in usuario["transacciones"] if f_inicio <= t[2] <= f_final]
+        if len(trans_rango) == 0:
+            print("No hay transacciones en ese rango.")
+        else:
+            for t in trans_rango:
+                print(t)
+
+    elif opcion == "2":
+        ultimas = usuario["transacciones"][-5:]
+        for t in ultimas:
+            print(t)
+
+    elif opcion == "3":
+        primeras = trans_mes[:5]
+        for t in primeras:
+            print(t)
+
+    else:
+        print("Opción inválida.")
 
 def log_in(db_datos):
     '''Funcion para hacer login en una cuenta'''
-    print("### INICIO DE SESION ###")
+    print("#### INICIO DE SESION ####")
     usuario_retry = 0
     while usuario_retry < 5:
         usuario = input("Ingrese nombre de usuario o 'salir' para cancelar:\n")
@@ -340,9 +425,19 @@ def gastos_compartidos():
     elif opcion == "s":
            print(f"Cada persona debe abonar ${monto/cant_personas}")    
              
-def inversiones(inversion, db_datos, usuario):
+def inversiones(usuario):
     '''Funcion para hacer inversiones a plazo fijo
     TOOD: Agregar cantidad de dias para el plazos fijo y calcular el interes basado en esto(30 dias, 60 dias)'''
+    print("#### INVERSION A PLAZO FIJO ####")
+
+    print(f"Su saldo es {usuario['saldo']}")
+    inversion = 0
+    while inversion <= 0 or inversion > usuario['saldo']:
+        inversion = int(input("Ingrese monto a invertir: "))
+        if inversion <= 0 or inversion > usuario['saldo']:
+            print(f"Monto invalido, ingrese monto mayor a 0 y menor a su saldo actual que es {usuario['saldo']}")
+
+    dias = int(input("Ingrese cantidad de dias para el plazo fijo: "))
     TASA_ANUAL = 0.50
     tasa_mensual = TASA_ANUAL/12
     monto = inversion
@@ -359,22 +454,28 @@ def inversiones(inversion, db_datos, usuario):
             print("Opción inválida, seleccione s para Sí, n para No")
     if opcion == "s":
         #TODO: Agregar funcion universal para quitar saldo
-        db_datos['usuarios'][usuario['nombre_usuario']]['saldo'] -= inversion
+        usuario['saldo'] -= inversion
+        registro_inversion = ["egreso", "inversion", fecha, inversion, "ARS", "inversion a plazo fijo"]
+        usuario['transacciones'].append(registro_inversion)
         print("Operación confirmada")
     elif opcion == "n":
         print("Operación cancelada")
 
 def menu():
     '''Funcion para mostrar menu'''
-    opcion = int(input('''##### MENU ##### \n
-    1. Ingresar dinero\n
-    2. Realizar transferencia\n
-    3. Resumen de cuenta\n
-    4. Control de Gastos\n
-    5. Calculo de Gastos Compartidos\n
-    6. Inversión a Plazo Fijo\n
-    7. Planificacion de Ahorro\n
-    8. Salir'''))
+    opcion = 0
+    while opcion < 1 or opcion > 8:
+        opcion = int(input('''##### MENU ##### \n
+        1. Ingresar dinero\n
+        2. Realizar transferencia\n
+        3. Resumen de cuenta\n
+        4. Control de Gastos\n
+        5. Calculo de Gastos Compartidos\n
+        6. Inversión a Plazo Fijo\n
+        7. Planificacion de Ahorro\n
+        8. Salir'''))
+        if opcion < 1 or opcion > 8:
+            print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
 
 def main():
@@ -408,33 +509,27 @@ def main():
     while menu_opcion > 0 and menu_opcion < 9:
         menu_opcion = menu()
         if menu_opcion == 1:
-            ingresar_dinero(usuario, db_datos)
+            ingresar_dinero(usuario)
         elif menu_opcion == 2:
-            realizar_transferencia()
+            realizar_transferencia(usuario, db_datos)
         elif menu_opcion == 3:
-            resumen_cuenta()
+            resumen_cuenta(usuario)
         elif menu_opcion == 4:
-            fecha_inicio = int(input('Ingrese fecha inicial de periodo: '))
-            fecha_final = int(input('Ingrese fecha final de periodo: '))
+            fecha_inicio = int(input('Ingrese fecha inicial de periodo (AAAA-MM-DD): '))
+            fecha_final = int(input('Ingrese fecha final de periodo (AAAA-MM-DD): '))
             control_gatos(fecha_inicio, fecha_final, usuario)
         elif menu_opcion == 5:
             gastos_compartidos()
         elif menu_opcion == 6:
-            print(f"Su saldo es {usuario['saldo']}")
-            inversion = 0
-            while inversion <= 0 or inversion > usuario['saldo']:
-                inversion = int(input("Ingrese monto a invertir: "))
-                if inversion <= 0 or inversion > usuario['saldo']:
-                    print(f"Monto invalido, ingrese monto mayor a 0 y menor a su saldo actual que es {usuario['saldo']}")
-            inversiones(inversion, db_datos, usuario)
-            print(db_datos['usuarios'][usuario['nombre_usuario']]['saldo'])
+            inversiones(usuario)
         elif menu_opcion == 7:
-            objetivo_ahorro(usuario,db_datos)
+            objetivo_ahorro(usuario)
         elif menu_opcion == 8:
             print("Gracias por usar el servicio")
         seguir = input("Desea hacer alguna otra operacion? s/n")
         if seguir == "n":
             print("Gracias por usar el servicio")
+            print(db_datos)
             menu_opcion = 100
 
 main()
