@@ -211,7 +211,7 @@ def realizar_transferencia(usuario, db_datos):
         alias_destino = input("Ingrese alias del destinatario: ")
         # Buscar usuario destino por alias
         usuario_destino = None
-        for u in db_datos["usuarios"].keys():
+        for u in db_datos["usuarios"]:
             if db_datos["usuarios"][u]['alias'] == alias_destino and usuario['alias'] != alias_destino:
                 usuario_destino = db_datos["usuarios"][u]
                 flag = False
@@ -369,7 +369,7 @@ def log_in(db_datos):
             print("Inicio de Sesion cancelado")
             return 
         #si el usuario existe en la DB
-        elif usuario in db_datos["usuarios"].keys():
+        elif usuario in db_datos["usuarios"]:
             contrasena_retry = 0
             while contrasena_retry < 5:
                 contrasena = input("Ingrese su contraseña:\n")
