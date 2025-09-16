@@ -89,19 +89,48 @@ def cargar_db():
             "email": "ssoler@test.com",
             "alias": "s_mp",
             "transacciones": [ 
-                ["egreso","pago","2025-09-02",2000,"ARS","Comida"],
-                ["egreso", "pago"    ,"2025-05-22",5000,"ARS","Comida"],
-                ["egreso", "pago"    ,"2025-05-23",5000,"ARS","Entretenimiento"],
-                ["egreso", "pago"    ,"2025-05-24",5000,"ARS","Facultad"],
-                ["egreso", "pago"    ,"2025-05-25",5000,"ARS","Laburo"],
-                ["egreso", "pago"    ,"2025-05-26",5000,"ARS","Laburo"],
-                ["egreso", "pago"    ,"2025-05-26",5000,"ARS","Comida"]
+                ["egreso","pago"  ,2025,2,21,2000,"ARS","Comida"],
+                ["egreso", "pago" ,2025,5,22,5000,"ARS","Comida"],
+                ["egreso", "pago" ,2025,5,23,5000,"ARS","Entretenimiento"],
+                ["egreso", "pago" ,2025,5,24,5000,"ARS","Facultad"],
+                ["egreso", "pago" ,2025,5,25,5000,"ARS","Laburo"],
+                ["egreso", "pago" ,2025,5,26,5000,"ARS","Laburo"],
+                ["egreso", "pago" ,2025,5,26,5000,"ARS","Comida"]
                  ],
             "saldo": 7000
         }
         }
     }
     return db_datos
+
+def solicitud_dia(mensaje):
+    '''Funcion para solicitar al usuario el ingreso del dia
+        Nota: Temporal hasta que se defina si se puede usar Datetime'''
+    mensaje += " | Formato: (AAAA-MM-DD)"
+    fecha = input(mensaje)
+    anio  = int(fecha[0:4])   #2025
+    mes   = int(fecha[5:7])   # 09
+    dia   = int(fecha[8:10]) 
+    return anio, mes, dia
+
+def checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, anio, mes, dia):
+    '''Funcion para checkear que la fecha ingresada este dentro del rango de fechas'''
+    if (anio > anio_inicio and anio < anio_final):
+        valido = True
+    elif anio == anio_inicio:
+        if (mes > mes_inicio) or (mes == mes_inicio and dia >= dia_inicio):
+            valido = True
+        else:
+            valido = False
+    elif anio == anio_final:
+        if (mes < mes_final) or (mes == mes_final and dia <= dia_final):
+            valido = True
+        else:
+            valido = False
+    else:
+        valido = False
+    
+    return valido
 
 def nuevo_usuario(db_datos):
     '''Funcion para crear nuevo usuario con validaciones basicas'''
@@ -192,12 +221,13 @@ def ingresar_dinero(usuario):
         else:
             monto_valido = True
 
-    fecha = input("Ingrese fecha (AAAA-MM-DD): ")
+    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
+
     etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
     if etiqueta == "":
         etiqueta = "Varios"
 
-    transaccion = ["ingreso", "deposito", fecha, montoo_, "ARS", etiqueta]
+    transaccion = ["ingreso", "deposito", anio, mes, dia, montoo_, "ARS", etiqueta]
     usuario['transacciones'].append(transaccion)
     usuario['saldo'] += montoo_
 
@@ -229,44 +259,52 @@ def realizar_transferencia(usuario, db_datos):
         elif usuario["saldo"] < monto:
             print("Saldo insuficiente para realizar la transferencia.")
 
-    
-    # Al no poder utilizar la libreria datetime por no ser parte de lo visto en clases
-    #solicitamos el ingres de la fecha de forma manual
-    fecha = input("Ingrese fecha (AAAA-MM-DD): ")
+    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
 
     # Restar del usuario emisor
     usuario["saldo"] -= monto
-    transaccion_emisor = ["egreso", "transferencia", fecha, monto, "ARS", "Transferencia a " + usuario_destino["nombre_usuario"]]
+    transaccion_emisor = ["egreso", "transferencia", anio, mes, dia, monto, "ARS", "Transferencia a " + usuario_destino["nombre_usuario"]]
     usuario["transacciones"].append(transaccion_emisor)
 
     # Sumar al usuario receptor
     usuario_destino["saldo"] += monto
-    transaccion_destino = ["ingreso", "transferencia", fecha, monto, "ARS", "Transferencia de " + usuario["nombre_usuario"]]
+    transaccion_destino = ["ingreso", "transferencia", anio, mes, dia, monto, "ARS", "Transferencia de " + usuario["nombre_usuario"]]
     usuario_destino["transacciones"].append(transaccion_destino)
 
     print(f"Transferencia realizada con éxito. Nuevo saldo: {usuario['saldo']}")
 
-def control_gatos(fecha_inicio, fecha_final, usuario):  #Fix
+def control_gatos(usuario):
     '''Funcion para hacer analisis de gastos'''
     print("#### CONTROL DE GASTOS ####")
+
+    anio_inicio, mes_inicio, dia_inicio = solicitud_dia("Ingrese fecha de inicio")
+    anio_final, mes_final, dia_final = solicitud_dia("Ingrese fecha de final")
     total = 0      
     categorias = {} #ver diccionario para poner categorias
 
     for i in usuario["transacciones"]:
         tipo = i[0]       # ingreso/egreso
-        fecha = i[2]      #"2025-09-02" 
-        monto = i[3]      
-        categoria = i[5]  
+        anio = i[2]
+        mes = i[3]
+        dia = i[4]
+        monto = i[5]      
+        categoria = i[7]  
 
         if tipo != "egreso":
             continue  # ignoramos ingresos
 
-        if fecha >= fecha_inicio and fecha <= fecha_final:
+        registro_valido = checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, anio, mes, dia)
+    
+        if registro_valido:
             total += monto
             if categoria not in categorias:
                 categorias[categoria] = 0
             categorias[categoria] += monto
 
+
+    fecha_inicio = str(anio_inicio)+"_"+str(mes_inicio)+"_"+str(dia_inicio)
+    fecha_final = str(anio_final)+"_"+str(mes_final)+"_"+str(dia_final)
+    
     if total == 0:
         print(f"No hubo egresos entre {fecha_inicio} y {fecha_final}.")
     else:
@@ -321,8 +359,8 @@ def resumen_cuenta(usuario):
     print("Transacciones del mes actual:\n")
 
     # Mostrar las transacciones del mes actual
-    hoy = datetime.today().strftime("%Y-%m")
-    trans_mes = [t for t in usuario["transacciones"] if t[2].startswith(hoy)]
+    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
+    trans_mes = [t for t in usuario["transacciones"] if t[2] == anio and t[3] == mes]
 
     if len(trans_mes) == 0:
         print("No hay transacciones este mes.")
@@ -337,9 +375,9 @@ def resumen_cuenta(usuario):
     opcion = input("Seleccione una opción: ")
 
     if opcion == "1":
-        f_inicio = input("Ingrese fecha de inicio (AAAA-MM-DD): ")
-        f_final = input("Ingrese fecha final (AAAA-MM-DD): ")
-        trans_rango = [t for t in usuario["transacciones"] if f_inicio <= t[2] <= f_final]
+        anio_inicio, mes_inicio, dia_inicio = solicitud_dia("Ingrese fecha de inicio")
+        anio_final,  mes_final, dia_final = solicitud_dia("Ingrese fecha final")
+        trans_rango = [t for t in usuario["transacciones"] if checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, t[2], t[3], t[4])]
         if len(trans_rango) == 0:
             print("No hay transacciones en ese rango.")
         else:
@@ -515,9 +553,7 @@ def main():
         elif menu_opcion == 3:
             resumen_cuenta(usuario)
         elif menu_opcion == 4:
-            fecha_inicio = int(input('Ingrese fecha inicial de periodo (AAAA-MM-DD): '))
-            fecha_final = int(input('Ingrese fecha final de periodo (AAAA-MM-DD): '))
-            control_gatos(fecha_inicio, fecha_final, usuario)
+            control_gatos(usuario)
         elif menu_opcion == 5:
             gastos_compartidos()
         elif menu_opcion == 6:
@@ -529,7 +565,6 @@ def main():
         seguir = input("Desea hacer alguna otra operacion? s/n")
         if seguir == "n":
             print("Gracias por usar el servicio")
-            print(db_datos)
             menu_opcion = 100
 
 main()
