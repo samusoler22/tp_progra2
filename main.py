@@ -511,7 +511,7 @@ def menu():
         5. Calculo de Gastos Compartidos\n
         6. Inversión a Plazo Fijo\n
         7. Planificacion de Ahorro\n
-        8. Salir'''))
+        8. Salir\n'''))
         if opcion < 1 or opcion > 8:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
@@ -521,13 +521,13 @@ def main():
     db_datos = cargar_db()
     log_in_opcion = int(input('''Desea Crear usuario o Iniciar sesion? \n
     1. Crear Usuario\n
-    2. Iniciar Sesion'''))
+    2. Iniciar Sesion\n'''))
 
     if log_in_opcion == 1:
         nuevo_usuario(db_datos)
         seguir = int(input('''Desea Iniciar sesion? \n
         1. Si\n
-        2. No'''))
+        2. No\n'''))
         if seguir == 1:
             usuario = log_in(db_datos)
             if usuario == None:
