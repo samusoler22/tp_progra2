@@ -4,17 +4,18 @@ from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg: 5 y 6
-        - Samu: 7 y 8
-        - Benja: 3 y 4
-        - Agus Lopez: 1 y 2
+        - Agus Goldberg: 5, 6
+        - Samu: 7, 8
+        - Benja: 3, 4
+        - Agus Lopez: 1, 2
 
     Ideas mejoras:
-    -Agregar una funcion que quite saldo al usuario y se use en las otras funciones como transferencias o inversiones
-        se le pasaria como argumento usuario (para ubicar en la DB), monto (para saber cuanto quitar) y motivo (para saber que tipo de transaccion es)
     - Quizas posibiliadad de comprar Stocks/Crypto
+    - Posibilidad de agregar pagos de servicios (Agua, luz, internet, Disney etc) agregando fecha de pago
+      a la data en lista y luego compara si ya es el dia de pago (un mes despues de la fecha en la DB)
 
     Tareas:
+        Entrega 40%
         1. Agregar validaciones del nuevo usuario (Funciones creadas dentro de la funcion nuevo_usuario)
             - En la funcion "nuevo usuario" crear logica para validar los datos que ingresa el usuario.
             - Las funciones ya estan prehechas, agregar mas de ser necesario.
@@ -25,13 +26,13 @@ from datetime import datetime
             - Tener en cuenta que habria que agregar una transaccion en el usuario por cada ingreso.
             - Que se agregue el ingreso al saldo del usuario.
             - IMPORTANTE: Tener en cuenta que la parte de las transacciones es una matriz.
-            LISTO/REVISAR: CAMBIAR FORMATO FECHA SEGUN CRITERIO FUNCION CONTROL DE GASTOS
+            LISTO
 
         3. Crear funcion para realizar transferencia.
             - Crear logica para realizar transferencia entre cuentas dentro de la funcion "realizar_transferencia"
             - Tener en cuenta que esta funcion usa dos parametros, uno es alias porque vamos a buscar el usuario a transferir en nuestro diccionario de usuarios
             - Tener en cuenta que el monto que se transfiere se resta del saldo del usuario que transfiere y se agregan las transacciones pertinentes.
-            REVISAR BENJA
+            LISTO
 
         4. Crear funcion para mostrar resumen de cuenta
             - Crear logica en funcion "resumen_cuenta"
@@ -40,12 +41,12 @@ from datetime import datetime
                 1-Mostrar resumen de transacciones entre un rango de fechas
                 2-Mostrar ultimos 5 transacciones (aca aplicamos slicing de la lista)
                 3-Mostrar primeras 5 transacciones del mes.
-            REVISAR BENJA
+            LISTO
         
         5 - Crear funcion de Control de Gastos.
             - Crear logica donde se muestre gastos total del mes y estilo de gastos basado en las etiquetas de las transacciones de egreso, ejemplo:
                 "Se gasto un 20% en comida"
-            REVISAR: VER FORMATO FECHA
+            LISTO
         
         6 - Crear funcion de objetivos de ahorro
             - Permitir al usuario ingresar cuanto desea ahorrar y cuando gana por su sueldo.
@@ -63,13 +64,53 @@ from datetime import datetime
             - Ingresar Monto a pagar.
             - Mostar cuanto debe pagar cada persona.
             LISTO
+        
+        Entrega 80%
+        9 - Añadir funcionalidad donde se crea un set con los nombres de los usuarios y al momento de crear un nuevo serio
+            se verifica a partir de ese set si el usuario ya existe o no
+
+        10 - Solicitar al crear usuario que ingrese fecha de nacimiento
+
+        11 - Crear Funcion donde a partir de la fecha de nacimiento ya sabemos el cumpleaños del usuario, comparamos
+            la fecha del dia de hoy usando datetime y en caso de que sea su cumpleaños printeamos una felicitacion al hacer login.
+        
+        12 - Implementar Datetime: Cambiar el formato de fecha anterior por valor datetime y adaptar las funciones que los usan para que funcione.
+            checkear funcion: solicitud_dia para que sea compatible con Datetime
+
+        13 - Crear funcion para sacar saldo de una cuenta y usarla en las distintas funciones que tienen esta funcionalidad
+            como: realizar transferencia, inversiones
+
+        14 - checkear si vale la pena modificar la funcion "realizar transferencia" y que solo llame dos funciones universales, sacar saldo de cuenta e ingresar saldo de cuenta
+            14.1 - Crear funcion para añadir saldo a una cuenta y usarla en las distintas funciones que tengan esta funcionalidad
+
+        15 - Modificar print de funcion "Resumen de Cuenta" para que se vea mas estetico
+
+        16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha.
+
+        Funciones de Administrador
+        17 - Agregar a los usuarios una key "Admin" al diccionario que usamos como base de datos con valor booleano
+            Esto va a representar si el usuario es Administrador de la aplicacion o no
+        
+        18 - Al crear una cuenta nueva preguntar si es una cuenta de Administrador, en caso que si, debera ingresar la contraseña de Administrador
+            y si coincide entonces el booleando de Admin es True
+        
+        19 - Agregar Menú especial para administradores
+
+        20 - Agregar funcion para obtener comision de las tranferencias (1%)
+        20.1 - Hay que crear una cuenta principal para el banco como usuario
+
+        Funciones de Administrador
+        21 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas en X fecha
+
+        22 - Agregar funcion para ver cantidad de usuarios registrados
+
+        23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
+
+        24 - Agregar funcion para ver dinero que gano el banco por comisiones 
 
     - FALTA AGREGAR:
-        1 - Matrices: Usar en lista de transacciones.               LISTO   - en Gastos Compartidos y Control Gastos
-        2 - Listas y sus funciones: ver en que parte usar.          LISTO   - Ingresar Dinero
-        3 - Comprension de Listas:                                  LISTO   - en Gastos Compartidos
-        4 - Funciones Lambda y metodos (Map, Filter, Reduce)        LISTO   - en Gastos Compartidos
-        5 - Slicing:                                                LISTO   - en Resumen de Cuenta
+        1 - Agregar Tuplas (Tuple)
+        2 - Agregar Conjuntos (Set)
     - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
     - '''
 
@@ -493,7 +534,7 @@ def inversiones(usuario):
     if opcion == "s":
         #TODO: Agregar funcion universal para quitar saldo
         usuario['saldo'] -= inversion
-        registro_inversion = ["egreso", "inversion", fecha, inversion, "ARS", "inversion a plazo fijo"]
+        registro_inversion = ["egreso", "inversion", fecha, inversion, "ARS", "inversion a plazo fijo"] # type: ignore
         usuario['transacciones'].append(registro_inversion)
         print("Operación confirmada")
     elif opcion == "n":
