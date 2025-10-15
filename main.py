@@ -4,10 +4,10 @@ from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg: 5, 6
-        - Samu: 7, 8
-        - Benja: 3, 4
-        - Agus Lopez: 1, 2
+        - Agus Goldberg: 40% (5, 6) 80% (11, 19, 20, 21)
+        - Samu:          40% (7, 8) 80% (12, 13, 14, 24)
+        - Benja:         40% (3, 4) 80% (9, 15, 16, 22)
+        - Agus Lopez:    40% (1, 2) 80% (10, 17, 18, 23)
 
     Ideas mejoras:
     - Quizas posibiliadad de comprar Stocks/Crypto
@@ -69,7 +69,7 @@ from datetime import datetime
         9 - Añadir funcionalidad donde se crea un set con los nombres de los usuarios y al momento de crear un nuevo serio
             se verifica a partir de ese set si el usuario ya existe o no
 
-        10 - Solicitar al crear usuario que ingrese fecha de nacimiento
+        10 - Solicitar al crear usuario que ingrese fecha de nacimiento y se guarde como tipo datetime en la DB
 
         11 - Crear Funcion donde a partir de la fecha de nacimiento ya sabemos el cumpleaños del usuario, comparamos
             la fecha del dia de hoy usando datetime y en caso de que sea su cumpleaños printeamos una felicitacion al hacer login.
@@ -77,15 +77,15 @@ from datetime import datetime
         12 - Implementar Datetime: Cambiar el formato de fecha anterior por valor datetime y adaptar las funciones que los usan para que funcione.
             checkear funcion: solicitud_dia para que sea compatible con Datetime
 
-        13 - Crear funcion para sacar saldo de una cuenta y usarla en las distintas funciones que tienen esta funcionalidad
+        13 - Crear funcion para sacar saldo de una cuenta para poder usarla en las distintas funciones que tengan esta funcionalidad
             como: realizar transferencia, inversiones
 
-        14 - checkear si vale la pena modificar la funcion "realizar transferencia" y que solo llame dos funciones universales, sacar saldo de cuenta e ingresar saldo de cuenta
+        14 - checkear si vale la pena modificar la funcion "realizar transferencia" y que solo llame dos funciones universales, (Que serian sacar saldo de cuenta e ingresar saldo de cuenta)
             14.1 - Crear funcion para añadir saldo a una cuenta y usarla en las distintas funciones que tengan esta funcionalidad
 
         15 - Modificar print de funcion "Resumen de Cuenta" para que se vea mas estetico
 
-        16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha.
+        16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha (Para esto aprovechamos que es Datetime).
 
         Funciones de Administrador
         17 - Agregar a los usuarios una key "Admin" al diccionario que usamos como base de datos con valor booleano
@@ -109,8 +109,9 @@ from datetime import datetime
         24 - Agregar funcion para ver dinero que gano el banco por comisiones 
 
     - FALTA AGREGAR:
-        1 - Agregar Tuplas (Tuple)
-        2 - Agregar Conjuntos (Set)
+        1 - Agregar Tuplas (Tuple) 
+        2 - Agregar Conjuntos (Set) - Agregar en Tarea 9
+        3 - Agregar Try/Except - Agregar en Validaciónes
     - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
     - '''
 
