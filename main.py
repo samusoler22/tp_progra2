@@ -4,10 +4,10 @@ from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg: 40% (5, 6) 80% (11, 19, 20, 21)
-        - Samu:          40% (7, 8) 80% (12, 13, 14, 24)
-        - Benja:         40% (3, 4) 80% (9, 15, 16, 22)
-        - Agus Lopez:    40% (1, 2) 80% (10, 17, 18, 23)
+        - Agus Goldberg: 40% (5, 6) 80% (11 L, 19  , 20  , 21)
+        - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24)
+        - Benja:         40% (3, 4) 80% (9   , 15  , 16  , 22)
+        - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
 
     Ideas mejoras:
     - Quizas posibiliadad de comprar Stocks/Crypto
@@ -69,13 +69,16 @@ from datetime import datetime
         9 - Añadir funcionalidad donde se crea un set con los nombres de los usuarios y al momento de crear un nuevo serio
             se verifica a partir de ese set si el usuario ya existe o no
 
-        10 - Solicitar al crear usuario que ingrese fecha de nacimiento y se guarde como tipo datetime en la DB
+        10 - Solicitar al crear usuario que ingrese fecha de nacimiento y guardarlo en la DB
+            LISTO
 
         11 - Crear Funcion donde a partir de la fecha de nacimiento ya sabemos el cumpleaños del usuario, comparamos
             la fecha del dia de hoy usando datetime y en caso de que sea su cumpleaños printeamos una felicitacion al hacer login.
+            LISTO
         
         12 - Implementar Datetime: Cambiar el formato de fecha anterior por valor datetime y adaptar las funciones que los usan para que funcione.
             checkear funcion: solicitud_dia para que sea compatible con Datetime
+            NO CAMBIADO, OK!
 
         13 - Crear funcion para sacar saldo de una cuenta para poder usarla en las distintas funciones que tengan esta funcionalidad
             como: realizar transferencia, inversiones
@@ -88,8 +91,9 @@ from datetime import datetime
         16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha (Para esto aprovechamos que es Datetime).
 
         Funciones de Administrador
-        17 - Agregar a los usuarios una key "Admin" al diccionario que usamos como base de datos con valor booleano
+        17 - Agregar a los usuarios una key "es_admin" al diccionario que usamos como base de datos con valor booleano
             Esto va a representar si el usuario es Administrador de la aplicacion o no
+            LISTO
         
         18 - Al crear una cuenta nueva preguntar si es una cuenta de Administrador, en caso que si, debera ingresar la contraseña de Administrador
             y si coincide entonces el booleando de Admin es True
@@ -105,6 +109,7 @@ from datetime import datetime
         22 - Agregar funcion para ver cantidad de usuarios registrados
 
         23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
+            LISTO
 
         24 - Agregar funcion para ver dinero que gano el banco por comisiones 
 
@@ -129,7 +134,9 @@ def cargar_db():
             "nombre_usuario": "uade_samuel",
             "contrasena": "test",
             "email": "ssoler@test.com",
+            "fecha_nacimiento": "28/10/1997",
             "alias": "s_mp",
+            "es_admin":True,
             "transacciones": [ 
                 ["egreso","pago"  ,2025,2,21,2000,"ARS","Comida"],
                 ["egreso", "pago" ,2025,5,22,5000,"ARS","Comida"],
@@ -139,7 +146,9 @@ def cargar_db():
                 ["egreso", "pago" ,2025,5,26,5000,"ARS","Laburo"],
                 ["egreso", "pago" ,2025,5,26,5000,"ARS","Comida"]
                  ],
-            "saldo": 7000
+            "saldo": 7000},
+        "administradores":{
+            "llaves":["seleccion"]
         }
         }
     }
@@ -230,13 +239,23 @@ def nuevo_usuario(db_datos):
                 valido_email = True
         return email
 
+    def check_admin(db):
+        '''Funcion para dar acceso de administrador a la cuenta creada''' 
+        contrasena = input("Ingrese contraseña de administrador:")
+        if contrasena in db["administradores"]["llaves"]:
+            return True
+        else:
+            return False
+
     print("#### CREANDO NUEVO USUARIO ####")
     nombre = input("Ingrese nombre completo: ")
     dni = input("Ingrese DNI: ")
     nombre_usuario = validar_usuario_unico()
     contrasena = validar_contrasena_usuario()
     email = validar_email()
+    fecha_nacimiento = "/".join(solicitud_dia("Ingrese fecha de nacimiento:"))
     alias = input("Ingrese alias: ")
+    es_admin = check_admin(db_datos)
 
     usuario = {
         "nombre": nombre,
@@ -244,7 +263,9 @@ def nuevo_usuario(db_datos):
         "nombre_usuario": nombre_usuario,
         "contrasena": contrasena,
         "email": email,
+        "fecha_nacimiento": fecha_nacimiento,
         "alias": alias,
+        "es_admin": es_admin,
         "transacciones": [],
         "saldo": 0
     }
@@ -455,7 +476,11 @@ def log_in(db_datos):
                 contrasena = input("Ingrese su contraseña:\n")
                 #si la contraseña es correcta
                 if contrasena == db_datos["usuarios"][usuario]['contrasena']:
-                    print(f"Bienvenido {db_datos['usuarios'][usuario]['nombre']}")
+                    cumpleanos = checkear_cumpleanos(db_datos['usuarios'][usuario])
+                    if cumpleanos:
+                        print(f"Bienvenido {db_datos['usuarios'][usuario]['nombre']}, Feliz Cumpleaños!!")
+                    else:
+                        print(f"Bienvenido {db_datos['usuarios'][usuario]['nombre']}")
                     return db_datos['usuarios'][usuario]
                 #si no es correcta, lo notificamos y se repite el bucle
                 else:
@@ -541,6 +566,23 @@ def inversiones(usuario):
     elif opcion == "n":
         print("Operación cancelada")
 
+def checkear_cumpleanos(usuario):
+    '''Funcion para checkear si es el cumpleaños del usuario''' 
+    fecha_nacimiento = datetime.strptime(usuario['fecha_nacimiento'], "%d/%m/%Y")
+    fecha_hoy = datetime.now()
+    print(fecha_nacimiento)
+    print(fecha_hoy)
+    if fecha_nacimiento.month == fecha_hoy.month and fecha_nacimiento.day == fecha_hoy.day:
+        return True
+    else:
+        return False
+
+#Funciones de Administrador
+def ver_dinero_depositado_en_banco(db_datos):
+    '''Funcion para ver cantidad de dinero depositado en todas las cuentas'''
+    dinero_depositado = reduce(lambda acumulador, usuario: acumulador + db_datos['usuarios'][usuario]['saldo'], db_datos['usuarios'], 0)
+    print("El dinero depositado en las cuentas del banco es: ", dinero_depositado)
+
 def menu():
     '''Funcion para mostrar menu'''
     opcion = 0
@@ -587,7 +629,10 @@ def main():
 
     menu_opcion = 1
     while menu_opcion > 0 and menu_opcion < 9:
-        menu_opcion = menu()
+        if usuario['es_admin']:
+            print("ADMINISTRADOR")
+        else:
+            menu_opcion = menu()
         if menu_opcion == 1:
             ingresar_dinero(usuario)
         elif menu_opcion == 2:
