@@ -602,18 +602,7 @@ def menu_administrador():
         if opcion < 1 or opcion > 11:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
-'''
 
-
-
-
-        22 - Agregar funcion para ver cantidad de usuarios registrados
-
-        23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
-            LISTO
-
-        24 - Agregar funcion para ver dinero que gano el banco por comisiones 
-        '''
 
 def menu():
     '''Funcion para mostrar menu'''
