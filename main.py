@@ -127,36 +127,8 @@ from datetime import datetime
 
 def cargar_db():
     '''Funcion para cargar en memoria los datos del archivo que se usa como DB optimizando los tiempos de ejecución'''
-    #with open('db.json', 'r') as archivo:
-    #    db_datos = json.load(archivo)
-    #return db_datos
-
-    db_datos = {
-        "usuarios":{
-            "uade_samuel": {
-            "nombre": "Samuel Soler",
-            "dni": "95918716",
-            "nombre_usuario": "uade_samuel",
-            "contrasena": "test",
-            "email": "ssoler@test.com",
-            "fecha_nacimiento": "28/10/1997",
-            "alias": "s_mp",
-            "es_admin":True,
-            "transacciones": [ 
-                ["egreso","pago"  ,2025,2,21,2000,"ARS","Comida"],
-                ["egreso", "pago" ,2025,5,22,5000,"ARS","Comida"],
-                ["egreso", "pago" ,2025,5,23,5000,"ARS","Entretenimiento"],
-                ["egreso", "pago" ,2025,5,24,5000,"ARS","Facultad"],
-                ["egreso", "pago" ,2025,5,25,5000,"ARS","Laburo"],
-                ["egreso", "pago" ,2025,5,26,5000,"ARS","Laburo"],
-                ["egreso", "pago" ,2025,5,26,5000,"ARS","Comida"]
-                 ],
-            "saldo": 7000},
-        "administradores":{
-            "llaves":["seleccion"]
-        }
-        }
-    }
+    with open('db.json', 'r') as archivo:
+        db_datos = json.load(archivo)
     return db_datos
 
 def solicitud_dia(mensaje):
