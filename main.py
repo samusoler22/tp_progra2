@@ -583,6 +583,38 @@ def ver_dinero_depositado_en_banco(db_datos):
     dinero_depositado = reduce(lambda acumulador, usuario: acumulador + db_datos['usuarios'][usuario]['saldo'], db_datos['usuarios'], 0)
     print("El dinero depositado en las cuentas del banco es: ", dinero_depositado)
 
+def menu_administrador():
+    '''Funcion para mostrar menu admin'''
+    opcion = 0
+    while opcion < 1 or opcion > 11:
+        opcion = int(input('''##### MENU ##### \n
+        1. Ingresar dinero\n
+        2. Realizar transferencia\n
+        3. Resumen de cuenta\n
+        4. Control de Gastos\n
+        5. Calculo de Gastos Compartidos\n
+        6. Inversión a Plazo Fijo\n
+        7. Planificacion de Ahorro\n
+        8. Ver dinero total depositado de todas las cuentas\n
+        9. Ver cantidad de usuarios registrados\n
+        10. Ganancias del banco\n
+        11. Salir\n'''))
+        if opcion < 1 or opcion > 11:
+            print("Opcion no valida, ingrese una opcion correcta del menú")
+    return opcion
+'''
+
+
+
+
+        22 - Agregar funcion para ver cantidad de usuarios registrados
+
+        23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
+            LISTO
+
+        24 - Agregar funcion para ver dinero que gano el banco por comisiones 
+        '''
+
 def menu():
     '''Funcion para mostrar menu'''
     opcion = 0
@@ -630,6 +662,7 @@ def main():
     menu_opcion = 1
     while menu_opcion > 0 and menu_opcion < 9:
         if usuario['es_admin']:
+            menu_administrador()
             print("ADMINISTRADOR")
         else:
             menu_opcion = menu()
