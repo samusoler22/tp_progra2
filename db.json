@@ -24,8 +24,8 @@
             "alias": "luis_mp",
             "es_admin": false,
             "transacciones": [ 
-                ["ingreso","deposito",2025,09,02,2000,"ARS","Comida"],
-                ["egreso","pago"     ,2025,05,22,5000,"ARS","Comida"]
+                ["ingreso","deposito",2025,9,2,2000,"ARS","Comida"],
+                ["egreso","pago"     ,2025,5,22,5000,"ARS","Comida"]
                  ],
             "saldo": 0
         }
