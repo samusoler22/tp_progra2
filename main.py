@@ -127,37 +127,37 @@ from datetime import datetime
 
 def cargar_db():
     '''Funcion para cargar en memoria los datos del archivo que se usa como DB optimizando los tiempos de ejecución'''
-    with open('db.json', 'r') as archivo:
-        db_datos = json.load(archivo)
-    return db_datos
+    #with open('db.json', 'r') as archivo:
+    #    db_datos = json.load(archivo)
+    #return db_datos
 
-    # db_datos = {
-    #     "usuarios":{
-    #         "uade_samuel": {
-    #         "nombre": "Samuel Soler",
-    #         "dni": "95918716",
-    #         "nombre_usuario": "uade_samuel",
-    #         "contrasena": "test",
-    #         "email": "ssoler@test.com",
-    #         "fecha_nacimiento": "28/10/1997",
-    #         "alias": "s_mp",
-    #         "es_admin":True,
-    #         "transacciones": [ 
-    #             ["egreso","pago"  ,2025,2,21,2000,"ARS","Comida"],
-    #             ["egreso", "pago" ,2025,5,22,5000,"ARS","Comida"],
-    #             ["egreso", "pago" ,2025,5,23,5000,"ARS","Entretenimiento"],
-    #             ["egreso", "pago" ,2025,5,24,5000,"ARS","Facultad"],
-    #             ["egreso", "pago" ,2025,5,25,5000,"ARS","Laburo"],
-    #             ["egreso", "pago" ,2025,5,26,5000,"ARS","Laburo"],
-    #             ["egreso", "pago" ,2025,5,26,5000,"ARS","Comida"]
-    #              ],
-    #         "saldo": 7000},
-    #     "administradores":{
-    #         "llaves":["seleccion"]
-    #     }
-    #     }
-    # }
-    # return db_datos
+    db_datos = {
+        "usuarios":{
+            "uade_samuel": {
+            "nombre": "Samuel Soler",
+            "dni": "95918716",
+            "nombre_usuario": "uade_samuel",
+            "contrasena": "test",
+            "email": "ssoler@test.com",
+            "fecha_nacimiento": "28/10/1997",
+            "alias": "s_mp",
+            "es_admin":True,
+            "transacciones": [ 
+                ["egreso","pago"  ,2025,2,21,2000,"ARS","Comida"],
+                ["egreso", "pago" ,2025,5,22,5000,"ARS","Comida"],
+                ["egreso", "pago" ,2025,5,23,5000,"ARS","Entretenimiento"],
+                ["egreso", "pago" ,2025,5,24,5000,"ARS","Facultad"],
+                ["egreso", "pago" ,2025,5,25,5000,"ARS","Laburo"],
+                ["egreso", "pago" ,2025,5,26,5000,"ARS","Laburo"],
+                ["egreso", "pago" ,2025,5,26,5000,"ARS","Comida"]
+                 ],
+            "saldo": 7000},
+        "administradores":{
+            "llaves":["seleccion"]
+        }
+        }
+    }
+    return db_datos
 
 def solicitud_dia(mensaje):
     '''Funcion para solicitar al usuario el ingreso del dia
@@ -588,6 +588,27 @@ def ver_dinero_depositado_en_banco(db_datos):
     dinero_depositado = reduce(lambda acumulador, usuario: acumulador + db_datos['usuarios'][usuario]['saldo'], db_datos['usuarios'], 0)
     print("El dinero depositado en las cuentas del banco es: ", dinero_depositado)
 
+def menu_administrador():
+    '''Funcion para mostrar menu admin'''
+    opcion = 0
+    while opcion < 1 or opcion > 11:
+        opcion = int(input('''##### MENU ##### \n
+        1. Ingresar dinero\n
+        2. Realizar transferencia\n
+        3. Resumen de cuenta\n
+        4. Control de Gastos\n
+        5. Calculo de Gastos Compartidos\n
+        6. Inversión a Plazo Fijo\n
+        7. Planificacion de Ahorro\n
+        8. Ver dinero total depositado de todas las cuentas\n
+        9. Ver cantidad de usuarios registrados\n
+        10. Ganancias del banco\n
+        11. Salir\n'''))
+        if opcion < 1 or opcion > 11:
+            print("Opcion no valida, ingrese una opcion correcta del menú")
+    return opcion
+
+
 def menu():
     '''Funcion para mostrar menu'''
     opcion = 0
@@ -635,6 +656,7 @@ def main():
     menu_opcion = 1
     while menu_opcion > 0 and menu_opcion < 9:
         if usuario['es_admin']:
+            menu_administrador()
             print("ADMINISTRADOR")
         else:
             menu_opcion = menu()
