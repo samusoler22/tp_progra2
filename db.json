@@ -8,7 +8,7 @@
             "email": "ssoler@test.com",
             "fecha_nacimiento": "25/1/1997",
             "alias": "s_mp",
-            "es_admin": false,
+            "es_admin": true,
             "transacciones": [ 
                 ["ingreso","deposito",2025,9,2,2000,"ARS","Comida"],
                 ["egreso", "pago"    ,2025,5,22,5000,"ARS","Comida"]
@@ -21,11 +21,12 @@
             "nombre_usuario": "uade_pedro",
             "contrasena": "B12345678",
             "email": "pluis@test.com",
+            "fecha_nacimiento": "28/10/1997",
             "alias": "luis_mp",
             "es_admin": false,
             "transacciones": [ 
-                ["ingreso","deposito",2025,09,02,2000,"ARS","Comida"],
-                ["egreso","pago"     ,2025,05,22,5000,"ARS","Comida"]
+                ["ingreso","deposito",2025,9,2,2000,"ARS","Comida"],
+                ["egreso","pago"     ,2025,5,22,5000,"ARS","Comida"]
                  ],
             "saldo": 0
         }
