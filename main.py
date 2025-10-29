@@ -5,7 +5,7 @@ from datetime import datetime
 '''TODO: 
     Repartición de Tareas:
         - Agus Goldberg: 40% (5, 6) 80% (11 L, 19  , 20  , 21)
-        - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24)
+        - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
         - Benja:         40% (3, 4) 80% (9   , 15  , 16  , 22)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
 
@@ -112,6 +112,11 @@ from datetime import datetime
             LISTO
 
         24 - Agregar funcion para ver dinero que gano el banco por comisiones 
+
+        25 - Lectura de base de datos desde archivo db.json
+            LISTO
+
+        26 - Crear funcion para guardar cambios realizados y que queden registrados en el archivo db.json
 
     - FALTA AGREGAR:
         1 - Agregar Tuplas (Tuple) 
