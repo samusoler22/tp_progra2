@@ -6,7 +6,7 @@ from datetime import datetime
     Repartición de Tareas:
         - Agus Goldberg: 40% (5, 6) 80% (11 L, 19  , 20  , 21)
         - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
-        - Benja:         40% (3, 4) 80% (9  C, 15 C, 16  , 22)
+        - Benja:         40% (3, 4) 80% (9  C, 15 C, 16 C, 22 C)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
 
     Ideas mejoras:
@@ -91,7 +91,8 @@ from datetime import datetime
              Chequear
 
         16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha (Para esto aprovechamos que es Datetime).
-
+             Chequear
+        
         Funciones de Administrador
         17 - Agregar a los usuarios una key "es_admin" al diccionario que usamos como base de datos con valor booleano
             Esto va a representar si el usuario es Administrador de la aplicacion o no
@@ -109,7 +110,7 @@ from datetime import datetime
         21 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas en X fecha
 
         22 - Agregar funcion para ver cantidad de usuarios registrados
-
+             Chequear
         23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
             LISTO
 
@@ -432,7 +433,7 @@ def resumen_cuenta(usuario):
     """Muestra resumen de cuenta con formato tabular y validación de fechas"""
     print("#### RESUMEN DE CUENTA ####")
     print(f"Saldo actual: {usuario['saldo']} ARS")
-    
+
     # Fecha actual
     hoy = datetime.now()
 
@@ -618,20 +619,25 @@ def ver_dinero_depositado_en_banco(db_datos):
     dinero_depositado = reduce(lambda acumulador, usuario: acumulador + db_datos['usuarios'][usuario]['saldo'], db_datos['usuarios'], 0)
     print("El dinero depositado en las cuentas del banco es: ", dinero_depositado)
 
+def ver_cantidad_usuarios(db_datos):
+    """Muestra la cantidad de usuarios registrados en la base de datos"""
+    cantidad = len(db_datos["usuarios"])
+    print(f"Actualmente hay {cantidad} usuarios registrados.")
+
 def menu_administrador():
     '''Funcion para mostrar menu admin'''
     opcion = 0
     while opcion < 1 or opcion > 11:
         opcion = int(input('''##### MENU ##### \n
-        1. Ingresar dinero\n
-        2. Realizar transferencia\n
-        3. Resumen de cuenta\n
-        4. Control de Gastos\n
-        5. Calculo de Gastos Compartidos\n
-        6. Inversión a Plazo Fijo\n
-        7. Planificacion de Ahorro\n
-        8. Ver dinero total depositado de todas las cuentas\n
-        9. Ver cantidad de usuarios registrados\n
+        1.  Ingresar dinero\n
+        2.  Realizar transferencia\n
+        3.  Resumen de cuenta\n
+        4.  Control de Gastos\n
+        5.  Calculo de Gastos Compartidos\n
+        6.  Inversión a Plazo Fijo\n
+        7.  Planificacion de Ahorro\n
+        8.  Ver dinero total depositado de todas las cuentas\n
+        9.  Ver cantidad de usuarios registrados\n
         10. Ganancias del banco\n
         11. Salir\n'''))
         if opcion < 1 or opcion > 11:
@@ -707,6 +713,9 @@ def main():
             objetivo_ahorro(usuario)
         elif menu_opcion == 8:
             print("Gracias por usar el servicio")
+        opcion = menu_administrador()
+        if opcion == 9:
+            ver_cantidad_usuarios(db_datos)
         seguir = input("Desea hacer alguna otra operacion? s/n ")
         if seguir == "n":
             print("Gracias por usar el servicio")
