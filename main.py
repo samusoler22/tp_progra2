@@ -6,7 +6,7 @@ from datetime import datetime
     Repartición de Tareas:
         - Agus Goldberg: 40% (5, 6) 80% (11 L, 19  , 20  , 21)
         - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
-        - Benja:         40% (3, 4) 80% (9   , 15  , 16  , 22)
+        - Benja:         40% (3, 4) 80% (9  C, 15 C, 16  , 22)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
 
     Ideas mejoras:
@@ -68,6 +68,7 @@ from datetime import datetime
         Entrega 80%
         9 - Añadir funcionalidad donde se crea un set con los nombres de los usuarios y al momento de crear un nuevo serio
             se verifica a partir de ese set si el usuario ya existe o no
+            Chequear
 
         10 - Solicitar al crear usuario que ingrese fecha de nacimiento y guardarlo en la DB
             LISTO
@@ -87,6 +88,7 @@ from datetime import datetime
             14.1 - Crear funcion para añadir saldo a una cuenta y usarla en las distintas funciones que tengan esta funcionalidad
 
         15 - Modificar print de funcion "Resumen de Cuenta" para que se vea mas estetico
+             Chequear
 
         16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha (Para esto aprovechamos que es Datetime).
 
@@ -160,7 +162,7 @@ def checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes
     
     return valido
 
-def nuevo_usuario(db_datos):
+def nuevo_usuario(db_datos, usuarios_set):
     '''Funcion para crear nuevo usuario con validaciones basicas'''
     def validar_usuario_unico():
         '''Funcion para validar que el usuario ingresado sea unico'''
@@ -172,7 +174,7 @@ def nuevo_usuario(db_datos):
                 print("El usuario no puede estar vacio ni ser 'salir'")
                 valido = False
             # no puede repetirse
-            elif nombre_usuario in db_datos["usuarios"]:
+            elif nombre_usuario in usuarios_set:
                 print("El usuario ya existe")
                 valido = False
             else:
@@ -218,7 +220,7 @@ def nuevo_usuario(db_datos):
 
     def check_admin(db):
         '''Funcion para dar acceso de administrador a la cuenta creada''' 
-        contrasena = input("Ingrese contraseña de administrador:")
+        contrasena = input("Ingrese contraseña de administrador: ")
         if contrasena in db["administradores"]["llaves"]:
             return True
         else:
@@ -230,7 +232,7 @@ def nuevo_usuario(db_datos):
     nombre_usuario = validar_usuario_unico()
     contrasena = validar_contrasena_usuario()
     email = validar_email()
-    fecha_nacimiento = "/".join(solicitud_dia("Ingrese fecha de nacimiento:"))
+    fecha_nacimiento = solicitud_dia("Ingrese fecha de nacimiento:")
     alias = input("Ingrese alias: ")
     es_admin = check_admin(db_datos)
 
@@ -248,6 +250,7 @@ def nuevo_usuario(db_datos):
     }
 
     db_datos["usuarios"][nombre_usuario] = usuario
+    usuarios_set.add(nombre_usuario)
     print("Usuario creado correctamente")
 
 def ingresar_dinero(usuario):
@@ -261,7 +264,10 @@ def ingresar_dinero(usuario):
         else:
             monto_valido = True
 
-    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
+    fecha = datetime.now()
+    anio = fecha.year
+    mes = fecha.month
+    dia = fecha.day
 
     etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
     if etiqueta == "":
@@ -299,7 +305,10 @@ def realizar_transferencia(usuario, db_datos):
         elif usuario["saldo"] < monto:
             print("Saldo insuficiente para realizar la transferencia.")
 
-    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
+    fecha = datetime.now()
+    anio = fecha.year
+    mes = fecha.month
+    dia = fecha.day
 
     # Restar del usuario emisor
     usuario["saldo"] -= monto
@@ -392,21 +401,52 @@ def objetivo_ahorro(usuario):
         print("Monto restante:", restante)
         print("Debes ahorrar por día:", ahorro_diario)
 
+from datetime import datetime
+
+def imprimir_tabla(transacciones, titulo="Transacciones"):
+    """Imprime las transacciones en formato tabular y legible"""
+    print(f"\n### {titulo} ###")
+    print("-" * 70)
+    print(f"{'Tipo':<10}{'Detalle':<15}{'Fecha':<12}{'Monto':<10}{'Etiqueta':<15}")
+    print("-" * 70)
+    for t in transacciones:
+        tipo, detalle, anio, mes, dia, monto, moneda, etiqueta = t
+        fecha = f"{anio}-{mes:02d}-{dia:02d}"
+        print(f"{tipo.capitalize():<10}{detalle:<15}{fecha:<12}${monto:<9}{etiqueta:<15}")
+    print("-" * 70)
+    print(f"Total de transacciones: {len(transacciones)}")
+
+
+def solicitud_dia(mensaje):
+    """Solicita una fecha al usuario y devuelve un objeto datetime"""
+    while True:
+        fecha_str = input(f"{mensaje} | Formato: (AAAA-MM-DD): ")
+        try:
+            fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+            return fecha
+        except ValueError:
+            print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
+
+
 def resumen_cuenta(usuario):
-    '''Funcion para mostrar resumen de cuenta'''
+    """Muestra resumen de cuenta con formato tabular y validación de fechas"""
     print("#### RESUMEN DE CUENTA ####")
     print(f"Saldo actual: {usuario['saldo']} ARS")
-    print("Transacciones del mes actual:\n")
+    
+    # Fecha actual
+    hoy = datetime.now()
 
-    # Mostrar las transacciones del mes actual
-    anio, mes, dia = solicitud_dia("Ingrese fecha de hoy")
-    trans_mes = [t for t in usuario["transacciones"] if t[2] == anio and t[3] == mes]
+    # Mostrar transacciones del mes actual
+    trans_mes = []
+    for t in usuario["transacciones"]:
+        tipo, detalle, anio, mes, dia, monto, moneda, etiqueta = t
+        if anio == hoy.year and mes == hoy.month:
+            trans_mes.append(t)
 
     if len(trans_mes) == 0:
         print("No hay transacciones este mes.")
     else:
-        for t in trans_mes:
-            print(t)
+        imprimir_tabla(trans_mes, "Transacciones del mes actual")
 
     print("\nOpciones:")
     print("1 - Mostrar transacciones entre rango de fechas")
@@ -415,27 +455,46 @@ def resumen_cuenta(usuario):
     opcion = input("Seleccione una opción: ")
 
     if opcion == "1":
-        anio_inicio, mes_inicio, dia_inicio = solicitud_dia("Ingrese fecha de inicio")
-        anio_final,  mes_final, dia_final = solicitud_dia("Ingrese fecha final")
-        trans_rango = [t for t in usuario["transacciones"] if checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, t[2], t[3], t[4])]
+        fecha_inicio = solicitud_dia("Ingrese fecha de inicio")
+        fecha_final  = solicitud_dia("Ingrese fecha final")
+
+        # Validaciones
+        if fecha_inicio > fecha_final:
+            print("La fecha de inicio no puede ser posterior a la fecha final.")
+            return
+        if fecha_final > hoy:
+            print("La fecha final no puede ser posterior a la fecha actual.")
+            return
+
+        trans_rango = []
+        for t in usuario["transacciones"]:
+            tipo, detalle, anio, mes, dia, monto, moneda, etiqueta = t
+            fecha_trans = datetime(anio, mes, dia)
+            if fecha_inicio <= fecha_trans <= fecha_final:
+                trans_rango.append(t)
+
         if len(trans_rango) == 0:
             print("No hay transacciones en ese rango.")
         else:
-            for t in trans_rango:
-                print(t)
+            imprimir_tabla(trans_rango, "Transacciones en el rango seleccionado")
 
     elif opcion == "2":
         ultimas = usuario["transacciones"][-5:]
-        for t in ultimas:
-            print(t)
+        if len(ultimas) == 0:
+            print("No hay transacciones registradas.")
+        else:
+            imprimir_tabla(ultimas, "Últimas 5 transacciones")
 
     elif opcion == "3":
-        primeras = trans_mes[:5]
-        for t in primeras:
-            print(t)
+        if len(trans_mes) == 0:
+            print("No hay transacciones este mes.")
+        else:
+            primeras = trans_mes[:5]
+            imprimir_tabla(primeras, "Primeras 5 transacciones del mes")
 
     else:
         print("Opción inválida.")
+
 
 def log_in(db_datos):
     '''Funcion para hacer login en una cuenta'''
@@ -544,11 +603,10 @@ def inversiones(usuario):
         print("Operación cancelada")
 
 def checkear_cumpleanos(usuario):
-    '''Funcion para checkear si es el cumpleaños del usuario''' 
-    fecha_nacimiento = datetime.strptime(usuario['fecha_nacimiento'], "%d/%m/%Y")
+    """Funcion para checkear si es el cumpleaños del usuario""" 
+    fecha_nacimiento = usuario['fecha_nacimiento']  # ya es datetime
     fecha_hoy = datetime.now()
-    print(fecha_nacimiento)
-    print(fecha_hoy)
+
     if fecha_nacimiento.month == fecha_hoy.month and fecha_nacimiento.day == fecha_hoy.day:
         return True
     else:
@@ -601,12 +659,13 @@ def menu():
 def main():
     '''Funcion principal que ejecuta el codigo'''
     db_datos = cargar_db()
+    usuarios_set = set(db_datos["usuarios"].keys())  # <-- conjunto con todos los usuarios existentes
     log_in_opcion = int(input('''Desea Crear usuario o Iniciar sesion? \n
     1. Crear Usuario\n
     2. Iniciar Sesion\n'''))
 
     if log_in_opcion == 1:
-        nuevo_usuario(db_datos)
+        nuevo_usuario(db_datos, usuarios_set)
         seguir = int(input('''Desea Iniciar sesion? \n
         1. Si\n
         2. No\n'''))
@@ -648,7 +707,7 @@ def main():
             objetivo_ahorro(usuario)
         elif menu_opcion == 8:
             print("Gracias por usar el servicio")
-        seguir = input("Desea hacer alguna otra operacion? s/n")
+        seguir = input("Desea hacer alguna otra operacion? s/n ")
         if seguir == "n":
             print("Gracias por usar el servicio")
             menu_opcion = 100
