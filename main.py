@@ -4,7 +4,7 @@ from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg: 40% (5, 6) 80% (11 L, 19  , 20  , 21)
+        - Agus Goldberg: 40% (5, 6) 80% (11 L, 19L  , 20  , 21)
         - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
         - Benja:         40% (3, 4) 80% (9  C, 15 C, 16 C, 22 C)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
@@ -311,17 +311,40 @@ def realizar_transferencia(usuario, db_datos):
     mes = fecha.month
     dia = fecha.day
 
-    # Restar del usuario emisor
+    # calculo comisión (1%)
+    comision = int(monto * 0.01)
+    monto_final = monto - comision
+
+    # resto monto del usuario emisor
     usuario["saldo"] -= monto
-    transaccion_emisor = ["egreso", "transferencia", anio, mes, dia, monto, "ARS", "Transferencia a " + usuario_destino["nombre_usuario"]]
+    transaccion_emisor = ["egreso", "transferencia", anio, mes, dia, monto, "ARS", f"Transferencia a {usuario_destino['nombre_usuario']} (comisión: {comision} ARS)"]
     usuario["transacciones"].append(transaccion_emisor)
 
-    # Sumar al usuario receptor
-    usuario_destino["saldo"] += monto
-    transaccion_destino = ["ingreso", "transferencia", anio, mes, dia, monto, "ARS", "Transferencia de " + usuario["nombre_usuario"]]
+    # calculo lo que le llega al usuario receptor
+    usuario_destino["saldo"] += monto_final
+    transaccion_destino = ["ingreso", "transferencia", anio, mes, dia, monto_final, "ARS", f"Transferencia de {usuario['nombre_usuario']}"]
     usuario_destino["transacciones"].append(transaccion_destino)
 
+    # Sumar comisión al banco (super admin), ver usuario administrador
+    if "banco" not in db_datos["usuarios"]:
+        db_datos["usuarios"]["banco"] = {
+            "nombre": "Banco",
+            "dni": "0",
+            "nombre_usuario": "banco",
+            "contrasena": "",
+            "email": "",
+            "fecha_nacimiento": datetime.now(),
+            "alias": "banco",
+            "es_admin": True,
+            "transacciones": [],
+            "saldo": 0
+        }
+    db_datos["usuarios"]["banco"]["saldo"] += comision
+    transaccion_banco = ["ingreso", "comision", anio, mes, dia, comision, "ARS", f"Comisión de transferencia de {usuario['nombre_usuario']}"]
+    db_datos["usuarios"]["banco"]["transacciones"].append(transaccion_banco)
+
     print(f"Transferencia realizada con éxito. Nuevo saldo: {usuario['saldo']}")
+    print(f"Comisión cobrada: {comision} ARS. El destinatario recibe: {monto_final} ARS")
 
 def control_gatos(usuario):
     '''Funcion para hacer analisis de gastos'''
