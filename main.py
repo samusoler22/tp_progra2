@@ -4,7 +4,7 @@ from datetime import datetime
 
 '''TODO: 
     Repartición de Tareas:
-        - Agus Goldberg: 40% (5, 6) 80% (11 L, 19L  , 20  , 21)
+        - Agus Goldberg: 40% (5, 6) 80% (11 L, 19L  , 20L  , 21L)
         - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
         - Benja:         40% (3, 4) 80% (9  C, 15 C, 16 C, 22 C)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
@@ -647,6 +647,21 @@ def ver_cantidad_usuarios(db_datos):
     cantidad = len(db_datos["usuarios"])
     print(f"Actualmente hay {cantidad} usuarios registrados.")
 
+def ver_dinero_disponible_en_fecha(db_datos):
+    '''Funcion para ver cantidad de dinero disponible en todas las cuentas en una fecha específica'''
+    print("#### DINERO DISPONIBLE EN FECHA ####")
+    fecha = input("Ingrese la fecha a consultar (AAAA-MM-DD): ")
+    try:
+        fecha_consulta = datetime.strptime(fecha, "%Y-%m-%d")
+    except ValueError:
+        print("Fecha inválida. Intente nuevamente.")
+        return
+    total = 0
+    for usuario in db_datos["usuarios"]:
+        saldo = db_datos["usuarios"][usuario]["saldo"]
+        total += saldo
+    print(f"El dinero disponible en todas las cuentas al día {fecha_str} es: {total} ARS")
+
 def menu_administrador():
     '''Funcion para mostrar menu admin'''
     opcion = 0
@@ -680,7 +695,8 @@ def menu():
         5. Calculo de Gastos Compartidos\n
         6. Inversión a Plazo Fijo\n
         7. Planificacion de Ahorro\n
-        8. Salir\n'''))
+        8. Ver dinero total en billeteras\n
+        9. Salir\n'''))
         if opcion < 1 or opcion > 8:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
@@ -714,7 +730,7 @@ def main():
                 return
 
     menu_opcion = 1
-    while menu_opcion > 0 and menu_opcion < 9:
+    while menu_opcion > 0 and menu_opcion < 10:
         if usuario['es_admin']:
             menu_administrador()
             print("ADMINISTRADOR")
@@ -735,6 +751,8 @@ def main():
         elif menu_opcion == 7:
             objetivo_ahorro(usuario)
         elif menu_opcion == 8:
+            ver_dinero_disponible_en_fecha(db_datos)
+        elif menu_opcion == 9:
             print("Gracias por usar el servicio")
         opcion = menu_administrador()
         if opcion == 9:
