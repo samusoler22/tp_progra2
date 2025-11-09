@@ -425,8 +425,6 @@ def objetivo_ahorro(usuario):
         print("Monto restante:", restante)
         print("Debes ahorrar por día:", ahorro_diario)
 
-from datetime import datetime
-
 def imprimir_tabla(transacciones, titulo="Transacciones"):
     """Imprime las transacciones en formato tabular y legible"""
     print(f"\n### {titulo} ###")
@@ -652,7 +650,7 @@ def ver_dinero_disponible_en_fecha(db_datos):
     print("#### DINERO DISPONIBLE EN FECHA ####")
     fecha = input("Ingrese la fecha a consultar (AAAA-MM-DD): ")
     try:
-        fecha_consulta = datetime.strptime(fecha, "%Y-%m-%d")
+        fecha_str = datetime.strptime(fecha, "%Y-%m-%d")
     except ValueError:
         print("Fecha inválida. Intente nuevamente.")
         return
