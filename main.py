@@ -6,7 +6,7 @@ from datetime import datetime
     Repartición de Tareas:
         - Agus Goldberg: 40% (5, 6) 80% (11 L, 19L  , 20L  , 21L)
         - Samu:          40% (7, 8) 80% (12 L, 13  , 14  , 24, 25 L)
-        - Benja:         40% (3, 4) 80% (9  C, 15 C, 16 C, 22 C)
+        - Benja:         40% (3, 4) 80% (9  L, 15 L, 16 L, 22 L)
         - Agus Lopez:    40% (1, 2) 80% (10 L, 17 L, 18 L, 23 L)
 
     Ideas mejoras:
@@ -68,18 +68,19 @@ from datetime import datetime
         Entrega 80%
         9 - Añadir funcionalidad donde se crea un set con los nombres de los usuarios y al momento de crear un nuevo serio
             se verifica a partir de ese set si el usuario ya existe o no
-            Chequear
+            LISTO - LINEA 718
 
         10 - Solicitar al crear usuario que ingrese fecha de nacimiento y guardarlo en la DB
-            LISTO
+            LISTO - LINEA 258
 
         11 - Crear Funcion donde a partir de la fecha de nacimiento ya sabemos el cumpleaños del usuario, comparamos
             la fecha del dia de hoy usando datetime y en caso de que sea su cumpleaños printeamos una felicitacion al hacer login.
-            LISTO
+            LISTO - LINEA 546
         
         12 - Implementar Datetime: Cambiar el formato de fecha anterior por valor datetime y adaptar las funciones que los usan para que funcione.
-            checkear funcion: solicitud_dia para que sea compatible con Datetime
-            NO CAMBIADO, OK!
+            checkear funcion: solicitud_dia para que sea compatible con Datetime.
+            NOTA: Al final como en JSON no se permite guardar tuplas ni objetos datetime decidimos crear una funcion que transforme los valores segun conveniencia.
+            LISTO - LINEA 141
 
         13 - Crear funcion para sacar saldo de una cuenta para poder usarla en las distintas funciones que tengan esta funcionalidad
             como: realizar transferencia, inversiones
@@ -88,64 +89,109 @@ from datetime import datetime
             14.1 - Crear funcion para añadir saldo a una cuenta y usarla en las distintas funciones que tengan esta funcionalidad
 
         15 - Modificar print de funcion "Resumen de Cuenta" para que se vea mas estetico
-             Chequear
+            LISTO
 
         16 - Resumen de Cuenta: Validar que cuando el usuario ingrese las fechas de inicio tiene que ser menor o igual al dia de la fecha (Para esto aprovechamos que es Datetime).
-             Chequear
+            LISTO - LINEA 515
         
         Funciones de Administrador
         17 - Agregar a los usuarios una key "es_admin" al diccionario que usamos como base de datos con valor booleano
             Esto va a representar si el usuario es Administrador de la aplicacion o no
-            LISTO
+            LISTO - LINEA 295
         
         18 - Al crear una cuenta nueva preguntar si es una cuenta de Administrador, en caso que si, debera ingresar la contraseña de Administrador
             y si coincide entonces el booleando de Admin es True
+            LISTO - LINEA 285
         
         19 - Agregar Menú especial para administradores
+            LISTO - LINEA 266
 
         20 - Agregar funcion para obtener comision de las tranferencias (1%)
         20.1 - Hay que crear una cuenta principal para el banco como usuario
+        LISTO - LINEA 381
 
         Funciones de Administrador
         21 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas en X fecha
 
         22 - Agregar funcion para ver cantidad de usuarios registrados
-             Chequear
-        23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
-            LISTO
+            LISTO - LINEA 684
 
-        24 - Agregar funcion para ver dinero que gano el banco por comisiones 
+        23 - Agregar funcion para ver cantidad de dinero depositado en todas las cuentas
+            LISTO - LINEA 678
+
+        24 - Agregar funcion para ver dinero que gano el banco por comisiones
+            LISTO - LINEA 687
 
         25 - Lectura de base de datos desde archivo db.json
-            LISTO
+            LISTO - LINEA 133
 
-        26 - Crear funcion para guardar cambios realizados y que queden registrados en el archivo db.json
+        26 - Crear funcion para guardar cambios realizados y que persistan en el archivo db.json
+            LISTO - LINEA 148
 
         RECURSIVIDAD = Linea 238.
-
-
-    - FALTA AGREGAR:
-        1 - Agregar Tuplas (Tuple) - AGREGAR A LAS FECHAS DE CUMPLEAÑOS
-        2 - Agregar Conjuntos (Set) - Agregar en Tarea 9
-        3 - Agregar Try/Except - Agregar en Validaciónes
-    - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
-    - '''
+        TUPLAS = FECHAS DE LOS CUMPLEAÑOS
+        SETS / CONJUNTOS = AGREGADOS EN VALIDACION DE USUARIOS UNICOS
+        TRY / EXCEPT = AGREGADO EN VALIDACIONES DE LECTURA DE DB (Archivo JSON) E INPUTS
+'''
 
 def cargar_db():
     '''Funcion para cargar en memoria los datos del archivo que se usa como DB optimizando los tiempos de ejecución'''
-    with open('db.json', 'r') as archivo:
-        db_datos = json.load(archivo)
-    return db_datos
+    try:
+        with open('db.json', 'r') as archivo:
+            db_datos = json.load(archivo)
+    except FileNotFoundError:
+        print("Error: No se pudo conectar a la base de datos")
+    except json.JSONDecodeError:
+        print("Error: Formato incorrecto en la base de datos")
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+    else:
+        return db_datos
 
-def solicitud_dia(mensaje):
+def persistir_datos(db_datos):
+    '''Funcion para guardar los datos en el archivo db.json'''
+    try:
+        with open('db.json', 'w') as archivo:
+            json.dump(db_datos, archivo)
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+
+def cambiar_formato_fechas(value, to):
+    '''Funcion para pasar tuplas a datetime y viceversa'''
+    if to == "datetime":
+        if type(value) == tuple:
+            return datetime(value[0], value[1], value[2])
+        elif type(value) == str:
+            return datetime.strptime(value, "%Y-%m-%d")
+    elif to == "tuple":
+        if type(value) == datetime:
+            values = value.strftime("%Y-%m-%d").split("-")
+            return int(values[0]), int(values[1]), int(values[2])
+        elif type(value) == str:
+            values = value.split("-")
+            return int(values[0]), int(values[1]), int(values[2])
+    elif to == "str":
+        if type(value) == tuple:
+            return "-".join(map(str, value))
+        elif type(value) == datetime:
+            return value.strftime("%Y-%m-%d")
+
+def solicitud_dia(mensaje, dt=False):
     '''Funcion para solicitar al usuario el ingreso del dia
-        Nota: Temporal hasta que se defina si se puede usar Datetime'''
+       parametro dt, define si se retorna un objeto datetime o tupla'''
     mensaje += " | Formato: (AAAA-MM-DD)"
-    fecha = input(mensaje)
-    anio  = int(fecha[0:4])   #2025
-    mes   = int(fecha[5:7])   # 09
-    dia   = int(fecha[8:10]) 
-    return anio, mes, dia
+    if dt:
+        while True:
+            fecha_str = input(mensaje)
+            try:
+                fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+                return fecha
+            except ValueError:
+                print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
+    else:
+        fecha = input(mensaje)
+        anio, mes, dia = fecha.split("-")
+        return anio, mes, dia
 
 def checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, anio, mes, dia):
     '''Funcion para checkear que la fecha ingresada este dentro del rango de fechas'''
@@ -246,7 +292,11 @@ def nuevo_usuario(db_datos, usuarios_set):
     nombre_usuario = validar_usuario_unico()
     contrasena = validar_contrasena_usuario()
     email = validar_email()
-    fecha_nacimiento = solicitud_dia("Ingrese fecha de nacimiento:")
+    fecha_nacimiento = solicitud_dia("Ingrese fecha de nacimiento:", True)
+    while fecha_nacimiento > datetime.now():
+        print("La fecha de nacimiento no puede ser posterior a la fecha actual. Ingrese nuevamente")
+        fecha_nacimiento = solicitud_dia("Ingrese fecha de nacimiento:", True)
+    fecha_nacimiento = cambiar_formato_fechas(fecha_nacimiento, "str")
     alias = input("Ingrese alias: ")
     es_admin = check_admin(db_datos)
 
@@ -266,6 +316,7 @@ def nuevo_usuario(db_datos, usuarios_set):
     db_datos["usuarios"][nombre_usuario] = usuario
     usuarios_set.add(nombre_usuario)
     print("Usuario creado correctamente")
+    persistir_datos(db_datos)
 
 def ingresar_dinero(usuario):
     '''Funcion para ingresar dinero a una cuenta'''
@@ -313,7 +364,10 @@ def realizar_transferencia(usuario, db_datos):
     
     monto = 0
     while monto <= 0 or usuario["saldo"] < monto:
-        monto = int(input("Ingrese monto a transferir: "))
+        try:
+            monto = int(input("Ingrese monto a transferir: "))
+        except ValueError:
+            print("El monto debe ser un numero valido.")
         if monto <= 0:
             print("El monto debe ser mayor a 0.")
         elif usuario["saldo"] < monto:
@@ -337,21 +391,6 @@ def realizar_transferencia(usuario, db_datos):
     usuario_destino["saldo"] += monto_final
     transaccion_destino = ["ingreso", "transferencia", anio, mes, dia, monto_final, "ARS", f"Transferencia de {usuario['nombre_usuario']}"]
     usuario_destino["transacciones"].append(transaccion_destino)
-
-    # Sumar comisión al banco (super admin), ver usuario administrador
-    if "banco" not in db_datos["usuarios"]:
-        db_datos["usuarios"]["banco"] = {
-            "nombre": "Banco",
-            "dni": "0",
-            "nombre_usuario": "banco",
-            "contrasena": "",
-            "email": "",
-            "fecha_nacimiento": datetime.now(),
-            "alias": "banco",
-            "es_admin": True,
-            "transacciones": [],
-            "saldo": 0
-        }
     db_datos["usuarios"]["banco"]["saldo"] += comision
     transaccion_banco = ["ingreso", "comision", anio, mes, dia, comision, "ARS", f"Comisión de transferencia de {usuario['nombre_usuario']}"]
     db_datos["usuarios"]["banco"]["transacciones"].append(transaccion_banco)
@@ -403,21 +442,33 @@ def control_gatos(usuario):
 def objetivo_ahorro(usuario):
     '''Funcion para crear objetivo de ahorro'''
     print("#### PLANIFICACION DE AHORRO ####") 
-    monto = int(input('Ingrese el monto que desea ahorrar (o escriba -1 para salir):'))
-    if monto == -1:
-            print("Volviendo al menú...")
-            return
-    while monto <= 0:
-        monto = int(input('Monto invalido, debe ser mayor a 0. Ingrese nuevamente'))
+    while True:
+        try:
+            monto = int(input('Ingrese el monto que desea ahorrar (o escriba -1 para salir):'))
+            if monto == -1:
+                print("Volviendo al menú...")
+                return
+            elif monto <= 0:
+                print('Monto invalido, debe ser mayor a 0. Intente nuevamente.')
+            else:
+                break
+        except ValueError:
+            print("El monto debe ser un número válido. Intente nuevamente.")
     
     motivo = input("Ingrese el motivo de este ahorro (ejemplo: viaje): ")
 
-    periodo = int(input('¿En cuántos días quiere lograrlo? (o escriba -1 para"salir"): '))
-    if periodo == -1:
-            print("Volviendo al menú...")
-            return
-    while periodo <= 0 or periodo > 36500:
-            periodo = int(input('Periodo invalido, debe ser mayor a 0. Ingrese nuevamente'))
+    while True:
+        try:
+            periodo = int(input('¿En cuántos días quiere lograrlo? (o escriba -1 para "salir"): '))
+            if periodo == -1:
+                print("Volviendo al menú...")
+                return
+            elif periodo <= 0 or periodo > 36500:
+                print('Periodo inválido, debe ser mayor a 0 y menor o igual a 36500. Ingrese nuevamente.')
+            else:
+                break
+        except ValueError:
+            print("El período debe ser un número válido. Intente nuevamente.")
 
     #calculo cuanto debe ahorra
     saldo_actual = usuario['saldo']
@@ -451,18 +502,6 @@ def imprimir_tabla(transacciones, titulo="Transacciones"):
     print("-" * 70)
     print(f"Total de transacciones: {len(transacciones)}")
 
-
-def solicitud_dia(mensaje):
-    """Solicita una fecha al usuario y devuelve un objeto datetime"""
-    while True:
-        fecha_str = input(f"{mensaje} | Formato: (AAAA-MM-DD): ")
-        try:
-            fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
-            return fecha
-        except ValueError:
-            print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
-
-
 def resumen_cuenta(usuario):
     """Muestra resumen de cuenta con formato tabular y validación de fechas"""
     print("#### RESUMEN DE CUENTA ####")
@@ -478,58 +517,57 @@ def resumen_cuenta(usuario):
         if anio == hoy.year and mes == hoy.month:
             trans_mes.append(t)
 
-    if len(trans_mes) == 0:
-        print("No hay transacciones este mes.")
-    else:
+    if len(trans_mes) != 0:
         imprimir_tabla(trans_mes, "Transacciones del mes actual")
+        print("\nOpciones:")
+        print("1 - Mostrar transacciones entre rango de fechas")
+        print("2 - Mostrar últimas 5 transacciones")
+        print("3 - Mostrar primeras 5 transacciones del mes")
+        opcion = input("Seleccione una opción: ")
 
-    print("\nOpciones:")
-    print("1 - Mostrar transacciones entre rango de fechas")
-    print("2 - Mostrar últimas 5 transacciones")
-    print("3 - Mostrar primeras 5 transacciones del mes")
-    opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            fecha_inicio = solicitud_dia("Ingrese fecha de inicio", dt=True)
+            fecha_final  = solicitud_dia("Ingrese fecha final", dt=True)
 
-    if opcion == "1":
-        fecha_inicio = solicitud_dia("Ingrese fecha de inicio")
-        fecha_final  = solicitud_dia("Ingrese fecha final")
+            # Validaciones
+            while fecha_inicio > fecha_final or fecha_final > datetime.now():
+                if fecha_inicio > fecha_final:
+                    print("La fecha de inicio no puede ser posterior a la fecha final. Ingrese nuevamente")
+                elif fecha_final > datetime.now():
+                    print("La fecha final no puede ser posterior a la fecha actual. Ingrese nuevamente")
+                fecha_inicio = solicitud_dia("Ingrese fecha de inicio", dt=True)
+                fecha_final  = solicitud_dia("Ingrese fecha final", dt=True)
 
-        # Validaciones
-        if fecha_inicio > fecha_final:
-            print("La fecha de inicio no puede ser posterior a la fecha final.")
-            return
-        if fecha_final > hoy:
-            print("La fecha final no puede ser posterior a la fecha actual.")
-            return
+            trans_rango = []
+            for t in usuario["transacciones"]:
+                tipo, detalle, anio, mes, dia, monto, moneda, etiqueta = t
+                fecha_trans = datetime(anio, mes, dia)
+                if fecha_inicio <= fecha_trans <= fecha_final:
+                    trans_rango.append(t)
 
-        trans_rango = []
-        for t in usuario["transacciones"]:
-            tipo, detalle, anio, mes, dia, monto, moneda, etiqueta = t
-            fecha_trans = datetime(anio, mes, dia)
-            if fecha_inicio <= fecha_trans <= fecha_final:
-                trans_rango.append(t)
+            if len(trans_rango) == 0:
+                print("No hay transacciones en ese rango.")
+            else:
+                imprimir_tabla(trans_rango, "Transacciones en el rango seleccionado")
 
-        if len(trans_rango) == 0:
-            print("No hay transacciones en ese rango.")
+        elif opcion == "2":
+            ultimas = usuario["transacciones"][-5:]
+            if len(ultimas) == 0:
+                print("No hay transacciones registradas.")
+            else:
+                imprimir_tabla(ultimas, "Últimas 5 transacciones")
+
+        elif opcion == "3":
+            if len(trans_mes) == 0:
+                print("No hay transacciones este mes.")
+            else:
+                primeras = trans_mes[:5]
+                imprimir_tabla(primeras, "Primeras 5 transacciones del mes")
+
         else:
-            imprimir_tabla(trans_rango, "Transacciones en el rango seleccionado")
-
-    elif opcion == "2":
-        ultimas = usuario["transacciones"][-5:]
-        if len(ultimas) == 0:
-            print("No hay transacciones registradas.")
-        else:
-            imprimir_tabla(ultimas, "Últimas 5 transacciones")
-
-    elif opcion == "3":
-        if len(trans_mes) == 0:
-            print("No hay transacciones este mes.")
-        else:
-            primeras = trans_mes[:5]
-            imprimir_tabla(primeras, "Primeras 5 transacciones del mes")
-
+            print("Opción inválida.")
     else:
-        print("Opción inválida.")
-
+        print("No hay transacciones este mes.")
 
 def log_in(db_datos):
     '''Funcion para hacer login en una cuenta'''
@@ -639,7 +677,7 @@ def inversiones(usuario):
 
 def checkear_cumpleanos(usuario):
     """Funcion para checkear si es el cumpleaños del usuario""" 
-    fecha_nacimiento = usuario['fecha_nacimiento']  # ya es datetime
+    fecha_nacimiento = cambiar_formato_fechas(usuario['fecha_nacimiento'], "datetime")
     fecha_hoy = datetime.now()
 
     if fecha_nacimiento.month == fecha_hoy.month and fecha_nacimiento.day == fecha_hoy.day:
@@ -658,6 +696,13 @@ def ver_cantidad_usuarios(db_datos):
     cantidad = len(db_datos["usuarios"])
     print(f"Actualmente hay {cantidad} usuarios registrados.")
 
+def ganancia_banco(db_datos):
+    '''Funcion para calcular la ganancia del banco'''
+    print("#### GANANCIA DEL BANCO ####")
+    banco = db_datos["usuarios"]["banco"]
+    saldo_banco = banco["saldo"]
+    print("Las ganancias del banco son de: ", saldo_banco)
+    
 def ver_dinero_disponible_en_fecha(db_datos):
     '''Funcion para ver cantidad de dinero disponible en todas las cuentas en una fecha específica'''
     print("#### DINERO DISPONIBLE EN FECHA ####")
@@ -685,14 +730,13 @@ def menu_administrador():
         5.  Calculo de Gastos Compartidos\n
         6.  Inversión a Plazo Fijo\n
         7.  Planificacion de Ahorro\n
-        8.  Ver dinero total depositado de todas las cuentas\n
-        9.  Ver cantidad de usuarios registrados\n
+        8.  Ver Dinero en todas las Cuentas\n
+        9.  Ver Cantidad Usuarios Registrados\n
         10. Ganancias del banco\n
         11. Salir\n'''))
         if opcion < 1 or opcion > 11:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
-
 
 def menu():
     '''Funcion para mostrar menu'''
@@ -706,7 +750,7 @@ def menu():
         5. Calculo de Gastos Compartidos\n
         6. Inversión a Plazo Fijo\n
         7. Planificacion de Ahorro\n
-        8. Ver dinero total en billeteras\n
+        8. Ver Dinero en Billeteras\n
         9. Salir\n'''))
         if opcion < 1 or opcion > 8:
             print("Opcion no valida, ingrese una opcion correcta del menú")
@@ -715,16 +759,21 @@ def menu():
 def main():
     '''Funcion principal que ejecuta el codigo'''
     db_datos = cargar_db()
-    usuarios_set = set(db_datos["usuarios"].keys())  # <-- conjunto con todos los usuarios existentes
+    usuarios_set = set(db_datos["usuarios"].keys())
     log_in_opcion = int(input('''Desea Crear usuario o Iniciar sesion? \n
     1. Crear Usuario\n
     2. Iniciar Sesion\n'''))
 
     if log_in_opcion == 1:
         nuevo_usuario(db_datos, usuarios_set)
-        seguir = int(input('''Desea Iniciar sesion? \n
-        1. Si\n
-        2. No\n'''))
+        seguir = None
+        while seguir not in [1,2]:
+            try:
+                seguir = int(input('''Desea Iniciar sesion? \n
+                1. Si\n
+                2. No\n'''))
+            except ValueError:
+                print("Opcion no valida, ingrese una opcion correcta del menú")
         if seguir == 1:
             usuario = log_in(db_datos)
             if usuario == None:
@@ -741,36 +790,63 @@ def main():
                 return
 
     menu_opcion = 1
-    while menu_opcion > 0 and menu_opcion < 10:
-        if usuario['es_admin']:
-            menu_administrador()
-            print("ADMINISTRADOR")
-        else:
+    if usuario['es_admin']:
+        while menu_opcion > 0 and menu_opcion < 11:
+            menu_opcion = menu_administrador()
+            if menu_opcion == 1:
+                ingresar_dinero(usuario)
+                persistir_datos(db_datos)
+            elif menu_opcion == 2:
+                realizar_transferencia(usuario, db_datos)
+                persistir_datos(db_datos)
+            elif menu_opcion == 3:
+                resumen_cuenta(usuario)
+            elif menu_opcion == 4:
+                control_gatos(usuario)
+            elif menu_opcion == 5:
+                gastos_compartidos()
+            elif menu_opcion == 6:
+                inversiones(usuario)
+                persistir_datos(db_datos)
+            elif menu_opcion == 7:
+                objetivo_ahorro(usuario)
+            elif menu_opcion == 8:
+                ver_dinero_depositado_en_banco(db_datos)
+            elif menu_opcion == 9:
+                ver_cantidad_usuarios(db_datos)
+            elif menu_opcion == 10:
+                ganancia_banco(db_datos)
+            seguir = input("Desea hacer alguna otra operacion? s/n ")
+            if seguir == "n":
+                print("Gracias por usar el servicio")
+                menu_opcion = 100
+    else:
+        while menu_opcion > 0 and menu_opcion < 10:
             menu_opcion = menu()
-        if menu_opcion == 1:
-            ingresar_dinero(usuario)
-        elif menu_opcion == 2:
-            realizar_transferencia(usuario, db_datos)
-        elif menu_opcion == 3:
-            resumen_cuenta(usuario)
-        elif menu_opcion == 4:
-            control_gatos(usuario)
-        elif menu_opcion == 5:
-            gastos_compartidos()
-        elif menu_opcion == 6:
-            inversiones(usuario)
-        elif menu_opcion == 7:
-            objetivo_ahorro(usuario)
-        elif menu_opcion == 8:
-            ver_dinero_disponible_en_fecha(db_datos)
-        elif menu_opcion == 9:
-            print("Gracias por usar el servicio")
-        opcion = menu_administrador()
-        if opcion == 9:
-            ver_cantidad_usuarios(db_datos)
-        seguir = input("Desea hacer alguna otra operacion? s/n ")
-        if seguir == "n":
-            print("Gracias por usar el servicio")
-            menu_opcion = 100
+            if menu_opcion == 1:
+                ingresar_dinero(usuario)
+                persistir_datos(db_datos)
+            elif menu_opcion == 2:
+                realizar_transferencia(usuario, db_datos)
+                persistir_datos(db_datos)
+            elif menu_opcion == 3:
+                resumen_cuenta(usuario)
+            elif menu_opcion == 4:
+                control_gatos(usuario)
+            elif menu_opcion == 5:
+                gastos_compartidos()
+            elif menu_opcion == 6:
+                inversiones(usuario)
+                persistir_datos(db_datos)
+            elif menu_opcion == 7:
+                objetivo_ahorro(usuario)
+            elif menu_opcion == 8:
+                ver_dinero_disponible_en_fecha(db_datos)
+            elif menu_opcion == 9:
+                print("Gracias por usar el servicio")
+            seguir = input("Desea hacer alguna otra operacion? s/n ")
+            if seguir == "n":
+                print("Gracias por usar el servicio")
+                menu_opcion = 100
 
 main()
