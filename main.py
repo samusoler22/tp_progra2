@@ -663,7 +663,7 @@ def ver_dinero_disponible_en_fecha(db_datos):
     print("#### DINERO DISPONIBLE EN FECHA ####")
     fecha = input("Ingrese la fecha a consultar (AAAA-MM-DD): ")
     try:
-        fecha_consulta = datetime.strptime(fecha, "%Y-%m-%d")
+        fecha_str = datetime.strptime(fecha, "%Y-%m-%d")
     except ValueError:
         print("Fecha inválida. Intente nuevamente.")
         return
