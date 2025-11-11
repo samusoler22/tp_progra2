@@ -179,19 +179,30 @@ def cambiar_formato_fechas(value, to):
 def solicitud_dia(mensaje, dt=False):
     '''Funcion para solicitar al usuario el ingreso del dia
        parametro dt, define si se retorna un objeto datetime o tupla'''
+    def checkear_formato(fecha):
+        '''Funcion para checkear que el string tiene el formato AAAA-MM-DD'''
+        try:
+            fecha = datetime.strptime(fecha, "%Y-%m-%d")
+            return fecha
+        except ValueError:
+            return False
+
     mensaje += " | Formato: (AAAA-MM-DD)"
     if dt:
         while True:
             fecha_str = input(mensaje)
-            try:
-                fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
-                return fecha
-            except ValueError:
-                print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
+            fecha_datetime = checkear_formato(fecha_str)
+            if fecha_datetime:
+                return fecha_datetime
+            print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
     else:
-        fecha = input(mensaje)
-        anio, mes, dia = fecha.split("-")
-        return anio, mes, dia
+        while True:
+            fecha_str = input(mensaje)
+            fecha_datetime = checkear_formato(fecha_str)
+            if fecha_datetime:
+                anio, mes, dia = fecha_datetime.strftime("%Y-%m-%d").split("-")
+                return int(anio), int(mes), int(dia)
+            print("Fecha inválida. Intente nuevamente con el formato AAAA-MM-DD.")
 
 def checkear_fecha_en_rango(anio_inicio, mes_inicio, dia_inicio, anio_final, mes_final, dia_final, anio, mes, dia):
     '''Funcion para checkear que la fecha ingresada este dentro del rango de fechas'''
@@ -272,14 +283,14 @@ def nuevo_usuario(db_datos, usuarios_set):
         '''Funcion para dar acceso de administrador a la cuenta creada'''
         valido_admin = False
         pregunta = input("¿Tiene acceso de administrador? (s/n): ")
-        if pregunta == "s":
+        if pregunta.lower() == "s":
             while valido_admin == False:
                 contrasena = input("Ingrese contraseña de administrador: ")
                 if contrasena in db["administradores"]["llaves"]:
                     valido_admin = True
                 else:
                     print("La contraseña no es correcta")
-        elif pregunta == "n":
+        elif pregunta.lower() == "n":
             return False
         else:
             print("Opción inválida, seleccione s para Sí, n para No")
@@ -321,18 +332,21 @@ def nuevo_usuario(db_datos, usuarios_set):
 def ingresar_dinero(usuario):
     '''Funcion para ingresar dinero a una cuenta'''
     print("#### INGRESANDO DINERO ####")
-    monto_valido = False
-    while monto_valido == False:
-        montoo_  = int(input("Ingrese monto a depositar: "))
-        if montoo_ <= 0:
-            print("El monto debe ser mayor a 0")
-        else:
-            monto_valido = True
+    monto_valido = True
+    while monto_valido:
+        try:
+            montoo_  = int(input("Ingrese monto a depositar: "))
+            if montoo_ <= 0:
+                print("El monto debe ser mayor a 0")
+            else:
+                monto_valido = False
+        except ValueError:
+            print("El monto debe ser un numero")
 
     fecha = datetime.now()
-    anio = fecha.year
-    mes = fecha.month
-    dia = fecha.day
+    anio = int(fecha.year)
+    mes = int(fecha.month)
+    dia = int(fecha.day)
 
     etiqueta = input("Ingrese etiqueta (ej: Sueldo, Comida): ")
     if etiqueta == "":
@@ -342,7 +356,7 @@ def ingresar_dinero(usuario):
     usuario['transacciones'].append(transaccion)
     usuario['saldo'] += montoo_
 
-    print("Deposito registrado. Nuevo saldo:", usuario['saldo'])
+    print(f"Deposito registrado. Nuevo saldo: {usuario['saldo']} pesos")
 
 def realizar_transferencia(usuario, db_datos):
     '''Funcion para realizar transferencia entre cuentas'''
@@ -374,9 +388,9 @@ def realizar_transferencia(usuario, db_datos):
             print("Saldo insuficiente para realizar la transferencia.")
 
     fecha = datetime.now()
-    anio = fecha.year
-    mes = fecha.month
-    dia = fecha.day
+    anio = int(fecha.year)
+    mes = int(fecha.month)
+    dia = int(fecha.day)
 
     # calculo comisión (1%)
     comision = int(monto * 0.01)
@@ -611,8 +625,26 @@ def gastos_compartidos():
     - Mostar cuanto debe pagar cada persona.'''
 
     print("#### Gastos Compartidos ####")
-    monto = int(input("Ingrese monto a repartir"))
-    cant_personas = int(input("Ingrese cantidad de personas a repartir el gasto"))
+    monto_valido = True
+    cant_personas_valido = True
+    while monto_valido:
+        try:
+            monto = int(input("Ingrese monto a repartir"))
+            if monto > 0:
+                monto_valido =False
+            else:
+                print("El Monto debe ser mayor a 0, Ingrese nuevamente")
+        except ValueError:
+            print("Monto invalido, ingrese un numero correcto")
+    while cant_personas_valido:
+        try:
+            cant_personas = int(input("Ingrese cantidad de personas a repartir el gasto"))
+            if cant_personas > 0:
+                cant_personas_valido = False
+            else:
+                print("La Cantidad de personas debe ser mayor a 0, Ingrese nuevamente")
+        except ValueError:
+            print("Cantidad de personas invalida, ingrese un numero correcto")
     opcion = ""
     while opcion != "s" and opcion != "n":
         opcion = input("Desea que el gasto se divida equitativamente? s/n: ")
@@ -644,6 +676,10 @@ def inversiones(usuario):
     TOOD: Agregar cantidad de dias para el plazos fijo y calcular el interes basado en esto(30 dias, 60 dias)'''
     print("#### INVERSION A PLAZO FIJO ####")
 
+    if usuario['saldo'] == 0:
+        print("Su saldo es de 0, no puede invertir")
+        return
+        
     print(f"Su saldo es {usuario['saldo']}")
     inversion = 0
     while inversion <= 0 or inversion > usuario['saldo']:
@@ -722,7 +758,7 @@ def menu_administrador():
     '''Funcion para mostrar menu admin'''
     opcion = 0
     while opcion < 1 or opcion > 11:
-        opcion = int(input('''##### MENU ##### \n
+        opcion = int(input('''##### MENU ADMINISTRADOR ##### \n
         1.  Ingresar dinero\n
         2.  Realizar transferencia\n
         3.  Resumen de cuenta\n
