@@ -615,7 +615,7 @@ def log_in(db_datos):
         #Si no existe, notificamos que no existe y se repite el bucle
         else:
             print(f"El Usuario {usuario} no existe, reintente nuevamente")
-        print(f"Cantidad de intentos restantes ({usuario_retry}/5)")
+        print(f"Cantidad de intentos restantes ({usuario_retry+1}/5)")
         usuario_retry += 1
 
 def gastos_compartidos():
@@ -786,8 +786,7 @@ def menu():
         5. Calculo de Gastos Compartidos\n
         6. Inversión a Plazo Fijo\n
         7. Planificacion de Ahorro\n
-        8. Ver Dinero en Billeteras\n
-        9. Salir\n'''))
+        8. Salir\n'''))
         if opcion < 1 or opcion > 8:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
@@ -796,10 +795,14 @@ def main():
     '''Funcion principal que ejecuta el codigo'''
     db_datos = cargar_db()
     usuarios_set = set(db_datos["usuarios"].keys())
-    log_in_opcion = int(input('''Desea Crear usuario o Iniciar sesion? \n
-    1. Crear Usuario\n
-    2. Iniciar Sesion\n'''))
-
+    log_in_opcion = 0
+    while log_in_opcion < 1 or log_in_opcion > 2:
+        try:
+            log_in_opcion = int(input('''Desea Crear usuario o Iniciar sesion? \n
+            1. Crear Usuario\n
+            2. Iniciar Sesion\n'''))
+        except ValueError:
+            print("Opcion no valida, ingrese una opcion correcta del menú")
     if log_in_opcion == 1:
         nuevo_usuario(db_datos, usuarios_set)
         seguir = None
@@ -852,12 +855,14 @@ def main():
                 ver_cantidad_usuarios(db_datos)
             elif menu_opcion == 10:
                 ganancia_banco(db_datos)
+            elif menu_opcion == 11:
+                print("Gracias por usar el servicio")
             seguir = input("Desea hacer alguna otra operacion? s/n ")
             if seguir == "n":
                 print("Gracias por usar el servicio")
                 menu_opcion = 100
     else:
-        while menu_opcion > 0 and menu_opcion < 10:
+        while menu_opcion > 0 and menu_opcion < 9:
             menu_opcion = menu()
             if menu_opcion == 1:
                 ingresar_dinero(usuario)
@@ -877,8 +882,6 @@ def main():
             elif menu_opcion == 7:
                 objetivo_ahorro(usuario)
             elif menu_opcion == 8:
-                ver_dinero_disponible_en_fecha(db_datos)
-            elif menu_opcion == 9:
                 print("Gracias por usar el servicio")
             seguir = input("Desea hacer alguna otra operacion? s/n ")
             if seguir == "n":
