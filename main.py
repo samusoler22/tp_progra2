@@ -704,8 +704,13 @@ def inversiones(usuario):
             print("Opción inválida, seleccione s para Sí, n para No")
     if opcion == "s":
         #TODO: Agregar funcion universal para quitar saldo
+        fecha = datetime.now()
+        anio = int(fecha.year)
+        mes = int(fecha.month)
+        dia = int(fecha.day)
+        
         usuario['saldo'] -= inversion
-        registro_inversion = ["egreso", "inversion", fecha, inversion, "ARS", "inversion a plazo fijo"] # type: ignore
+        registro_inversion = ["egreso", "inversion", anio, mes, dia, inversion, "ARS", "inversion a plazo fijo"] # type: ignore
         usuario['transacciones'].append(registro_inversion)
         print("Operación confirmada")
     elif opcion == "n":
