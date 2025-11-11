@@ -121,8 +121,11 @@ from datetime import datetime
 
         26 - Crear funcion para guardar cambios realizados y que queden registrados en el archivo db.json
 
+        RECURSIVIDAD = Linea 238.
+
+
     - FALTA AGREGAR:
-        1 - Agregar Tuplas (Tuple) 
+        1 - Agregar Tuplas (Tuple) - AGREGAR A LAS FECHAS DE CUMPLEAÑOS
         2 - Agregar Conjuntos (Set) - Agregar en Tarea 9
         3 - Agregar Try/Except - Agregar en Validaciónes
     - Crear o funcion (o no) para validar que el numero ingresado en el input este dentro de las opciones (menu por ejemplo)
@@ -220,12 +223,22 @@ def nuevo_usuario(db_datos, usuarios_set):
         return email
 
     def check_admin(db):
-        '''Funcion para dar acceso de administrador a la cuenta creada''' 
-        contrasena = input("Ingrese contraseña de administrador: ")
-        if contrasena in db["administradores"]["llaves"]:
-            return True
-        else:
+        '''Funcion para dar acceso de administrador a la cuenta creada'''
+        valido_admin = False
+        pregunta = input("¿Tiene acceso de administrador? (s/n): ")
+        if pregunta == "s":
+            while valido_admin == False:
+                contrasena = input("Ingrese contraseña de administrador: ")
+                if contrasena in db["administradores"]["llaves"]:
+                    valido_admin = True
+                else:
+                    print("La contraseña no es correcta")
+        elif pregunta == "n":
             return False
+        else:
+            print("Opción inválida, seleccione s para Sí, n para No")
+            valido_admin = check_admin(db)
+        return valido_admin
 
     print("#### CREANDO NUEVO USUARIO ####")
     nombre = input("Ingrese nombre completo: ")
@@ -424,8 +437,6 @@ def objetivo_ahorro(usuario):
         print("Saldo actual:", saldo_actual)
         print("Monto restante:", restante)
         print("Debes ahorrar por día:", ahorro_diario)
-
-from datetime import datetime
 
 def imprimir_tabla(transacciones, titulo="Transacciones"):
     """Imprime las transacciones en formato tabular y legible"""
