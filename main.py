@@ -1,3 +1,4 @@
+import os
 import json
 from functools import reduce
 from datetime import datetime
@@ -136,8 +137,9 @@ from datetime import datetime
 
 def cargar_db():
     '''Funcion para cargar en memoria los datos del archivo que se usa como DB optimizando los tiempos de ejecución'''
+    
     try:
-        with open('db.json', 'r') as archivo:
+        with open(os.path.abspath('db.json'), 'r') as archivo:
             db_datos = json.load(archivo)
     except FileNotFoundError:
         print("Error: No se pudo conectar a la base de datos")
@@ -297,9 +299,21 @@ def nuevo_usuario(db_datos, usuarios_set):
             valido_admin = check_admin(db)
         return valido_admin
 
+    def validacion_vacio(mensaje):
+        '''Funcion para validar que el input no esta vacio'''
+        flag = True
+        while flag:
+            input_ = input(mensaje)
+            if input_.strip():
+                flag = False
+            else:
+                print("valor vacio, ingrese nuevamente")
+        
+        return input_
+
     print("#### CREANDO NUEVO USUARIO ####")
-    nombre = input("Ingrese nombre completo: ")
-    dni = input("Ingrese DNI: ")
+    nombre = validacion_vacio("Ingrese nombre completo: ")
+    dni = validacion_vacio("Ingrese DNI: ")
     nombre_usuario = validar_usuario_unico()
     contrasena = validar_contrasena_usuario()
     email = validar_email()
@@ -674,7 +688,7 @@ def gastos_compartidos():
 def inversiones(usuario):
     '''Funcion para hacer inversiones a plazo fijo
     TOOD: Agregar cantidad de dias para el plazos fijo y calcular el interes basado en esto(30 dias, 60 dias)'''
-    print("#### INVERSION A PLAZO FIJO ####")
+    print("#### INVERSION A PLAZO FIJO (1 AÑO) ####")
 
     if usuario['saldo'] == 0:
         print("Su saldo es de 0, no puede invertir")
@@ -683,11 +697,13 @@ def inversiones(usuario):
     print(f"Su saldo es {usuario['saldo']}")
     inversion = 0
     while inversion <= 0 or inversion > usuario['saldo']:
-        inversion = int(input("Ingrese monto a invertir: "))
+        try:
+            inversion = int(input("Ingrese monto a invertir: "))
+        except ValueError:
+            inversion = -1
         if inversion <= 0 or inversion > usuario['saldo']:
             print(f"Monto invalido, ingrese monto mayor a 0 y menor a su saldo actual que es {usuario['saldo']}")
 
-    dias = int(input("Ingrese cantidad de dias para el plazo fijo: "))
     TASA_ANUAL = 0.50
     tasa_mensual = TASA_ANUAL/12
     monto = inversion
