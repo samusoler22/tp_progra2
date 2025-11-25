@@ -133,6 +133,14 @@ from datetime import datetime
         TUPLAS = FECHAS DE LOS CUMPLEAÑOS
         SETS / CONJUNTOS = AGREGADOS EN VALIDACION DE USUARIOS UNICOS
         TRY / EXCEPT = AGREGADO EN VALIDACIONES DE LECTURA DE DB (Archivo JSON) E INPUTS
+
+        Entrega 100%
+        27 - pagos de servicios (Agua, luz, internet, Servicios de Streaming)
+
+        28 - Estetica del Menú
+
+
+
 '''
 
 def cargar_db():
