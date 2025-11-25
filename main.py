@@ -134,12 +134,6 @@ from datetime import datetime
         SETS / CONJUNTOS = AGREGADOS EN VALIDACION DE USUARIOS UNICOS
         TRY / EXCEPT = AGREGADO EN VALIDACIONES DE LECTURA DE DB (Archivo JSON) E INPUTS
 
-        Entrega 100%
-        27 - pagos de servicios (Agua, luz, internet, Servicios de Streaming)
-
-        28 - Estetica del Menú
-
-
 
 '''
 
@@ -787,18 +781,21 @@ def menu_administrador():
     '''Funcion para mostrar menu admin'''
     opcion = 0
     while opcion < 1 or opcion > 11:
-        opcion = int(input('''##### MENU ADMINISTRADOR ##### \n
-        1.  Ingresar dinero\n
-        2.  Realizar transferencia\n
-        3.  Resumen de cuenta\n
-        4.  Control de Gastos\n
-        5.  Calculo de Gastos Compartidos\n
-        6.  Inversión a Plazo Fijo\n
-        7.  Planificacion de Ahorro\n
-        8.  Ver Dinero en todas las Cuentas\n
-        9.  Ver Cantidad Usuarios Registrados\n
-        10. Ganancias del banco\n
-        11. Salir\n'''))
+        try:
+            opcion = int(input('''##### MENU ADMINISTRADOR ##### \n
+            1.  Ingresar dinero\n
+            2.  Realizar transferencia\n
+            3.  Resumen de cuenta\n
+            4.  Control de Gastos\n
+            5.  Calculo de Gastos Compartidos\n
+            6.  Inversión a Plazo Fijo\n
+            7.  Planificacion de Ahorro\n
+            8.  Ver Dinero en todas las Cuentas\n
+            9.  Ver Cantidad Usuarios Registrados\n
+            10. Ganancias del banco\n
+            11. Salir\n'''))
+        except ValueError:
+            opcion = -1
         if opcion < 1 or opcion > 11:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
@@ -807,15 +804,18 @@ def menu():
     '''Funcion para mostrar menu'''
     opcion = 0
     while opcion < 1 or opcion > 8:
-        opcion = int(input('''##### MENU ##### \n
-        1. Ingresar dinero\n
-        2. Realizar transferencia\n
-        3. Resumen de cuenta\n
-        4. Control de Gastos\n
-        5. Calculo de Gastos Compartidos\n
-        6. Inversión a Plazo Fijo\n
-        7. Planificacion de Ahorro\n
-        8. Salir\n'''))
+        try:
+            opcion = int(input('''##### MENU ##### \n
+            1. Ingresar dinero\n
+            2. Realizar transferencia\n
+            3. Resumen de cuenta\n
+            4. Control de Gastos\n
+            5. Calculo de Gastos Compartidos\n
+            6. Inversión a Plazo Fijo\n
+            7. Planificacion de Ahorro\n
+            8. Salir\n'''))
+        except ValueError:
+            opcion = -1
         if opcion < 1 or opcion > 8:
             print("Opcion no valida, ingrese una opcion correcta del menú")
     return opcion
